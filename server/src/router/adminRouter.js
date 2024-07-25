@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const {v4: uuidv4} = require('uuid');
 const {doLogin} = require("../server/blog");
-const {mysqlConn} = require('../mysql/mysql');
+const {Query} = require('../mysql/mysql');
 router.post("/login", async (req, res) => {
 // body请求参数
 	const {account, password} = req.body;
@@ -20,12 +20,13 @@ router.post("/login", async (req, res) => {
 		const admin_token = uuidv4();
 		const admin_id = rows[0].id;
 		// 3.将生成的token存入数据库
-		const sql = "update `admin` set `account`=? where `id`=?";
-		await mysqlConn(sql, [account, admin_id]);// 依据更新admin表
-		// 4.将token返回给前端
+		const sql = "update `admin` set `token`=? where `id`=?";
+		// 4.根据当前条数据的id,更新token值
+		await Query(sql, [admin_token, admin_id]);// 依据更新admin表
+		// 5.将token返回给前端
 		let admin_info = rows[0];// 第一请求来的数据，token还是空的
 		admin_info.token = admin_token;
-		// 5.将返回给前端的密码置空，避免密码返回给前端
+		// 6.将返回给前端的密码置空，避免密码返回给前端
 		admin_info.password = "";
 		res.send({
 			code: 200,

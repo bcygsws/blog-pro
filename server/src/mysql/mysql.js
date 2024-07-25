@@ -16,7 +16,7 @@ db.connect(err => {
 	console.log("mysql连接成功");
 });
 
-function mysqlConn(sql, data) {
+function Query(sql, data) {
 
 	return new Promise((resolve, reject) => {
 		// 在数据库查询，为异步操作，使用promise处理
@@ -47,6 +47,6 @@ function mysqlConn(sql, data) {
 
 
 module.exports = {
-	mysqlConn
+	Query
 
 }
