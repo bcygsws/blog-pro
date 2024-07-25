@@ -23,6 +23,9 @@
 
 <style lang="scss" scoped>
 .home-container {
+  width: 1200px;
+  margin: 0 auto;
+
   .header {
     display: flex;
     flex-flow: row nowrap;

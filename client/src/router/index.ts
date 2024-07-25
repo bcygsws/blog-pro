@@ -7,22 +7,38 @@ const routes = [
         children: [// 一级组件，两个/home和/login
             {
                 path: '/home',
-                component: () => import("@/views/HomeView.vue"),
+                component: () => import("@/views/home/HomeView.vue"),
                 redirect: '/main',
                 children: [
                     {
                         path: '/main',
-                        component: () => import("@/views/MainView.vue")
+                        component: () => import("@/components/main/MainView.vue")
                     },
                     {
                         path: '/category',
-                        component: () => import("@/views/CategoryView.vue")
+                        component: () => import("@/components/category/CategoryView.vue")
                     }
                 ]
             },
             {
                 path: '/login',
-                component: () => import("@/views/Login.vue")
+                component: () => import("@/views/login/Login.vue")
+            },
+            {
+                path: '/dashboard',
+                component: () => import("@/views/dashboard/DashBoard.vue"),
+                redirect: '/dashboard/manage_art',
+                children: [
+                    {
+                        path: '/dashboard/manage_art',
+                        component: () => import("@/components/manage/ManageArt.vue")
+
+                    },
+                    {
+                        path: '/dashboard/manage_cat',
+                        component: () => import("@/components/manage/ManageCat.vue")
+                    }
+                ]
             }
 
         ]

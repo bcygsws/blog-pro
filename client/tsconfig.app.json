@@ -30,7 +30,9 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    /*naive ui框架对Volar的支持*/
+    "types": ["naive-ui/volar"]
   },
   "include": [
     "src/**/*.ts",

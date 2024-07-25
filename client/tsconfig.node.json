@@ -14,7 +14,11 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    /*naive ui框架对Volar的支持*/
+    "types": [
+      "naive-ui/volar"
+    ]
   },
   // 例如：router/index.ts识别，需要在两个分开的json文件中添加配置
   "include": [
