@@ -22,7 +22,10 @@
   },
   // 例如：router/index.ts识别，需要在两个分开的json文件中添加配置
   "include": [
-    "vite.config.ts",
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "vite.config.ts"
   ]
 }
