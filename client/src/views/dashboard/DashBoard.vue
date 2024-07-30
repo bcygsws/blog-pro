@@ -31,6 +31,8 @@
         </n-layout>
       </n-layout>
     </n-layout>
+    <!--水印-->
+    <div class="mark">后台管理系统</div>
   </div>
 
 </template>
@@ -65,6 +67,10 @@
       background-color: $info;
       color: #ffffff;
     }
+  }
+
+  .mark {
+    font-size: 64px;
   }
 }
 

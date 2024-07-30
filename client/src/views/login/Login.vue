@@ -53,9 +53,9 @@ import type {FormInst, FormItemRule, FormRules} from 'naive-ui';
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
 import {IForm, loginAPI} from "@/apis/login";
 import useLogin from "@/store/login";
-import {clear, setToken} from "@/utils/token";
+import {setToken} from "@/utils/token";
 import {encode, decode} from "js-base64";
-import resetForm from "@/utils/reset.ts";
+import resetForm from "@/utils/resetForm";
 
 const {message} = useDiscreteAPI();
 const loginStore = useLogin();

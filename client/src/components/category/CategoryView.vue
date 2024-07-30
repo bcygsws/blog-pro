@@ -1,10 +1,12 @@
 <!--
-*@name: Login
+*@name: CategoryView
 *@author: Bao Chengyi
 *@date: 2024/7/24 21:45
 -->
 <template>
-  分类
+  <div>
+    我是列表组件
+  </div>
 </template>
 <script lang="ts">
 
