@@ -5,7 +5,7 @@
 interface ResType<T> {
     code: number
     message: string
-    data: T
+    data?: T
 }
 
 export default ResType;

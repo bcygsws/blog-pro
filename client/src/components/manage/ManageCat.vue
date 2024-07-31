@@ -12,7 +12,7 @@
     <n-data-table
         :columns="columns"
         :single-line="false"
-        :data="data"
+        :data="catList"
         :pagination="false"
         :bordered="false"
     />
@@ -22,7 +22,7 @@
         <div>{{ status === 1 ? '修改分类' : '添加分类' }}</div>
       </template>
       <div class="content">
-        <n-input v-model:value="catValue" placeholder="请输入一个分类"/>
+        <n-input v-model:value="catValue.name" placeholder="请输入一个分类"/>
       </div>
       <template #action>
         <div>
@@ -33,17 +33,14 @@
   </div>
 </template>
 <script lang="ts">
-import {defineComponent, h, ref} from 'vue';
+import {defineComponent, h, onMounted, ref} from 'vue';
 import {NButton} from 'naive-ui'
 import type {DataTableColumns} from 'naive-ui';
 import UseDiscreteAPI from "@/utils/useDiscreteAPI.ts";
+import {addCatAPI, changeCatAPI, getCatAPI, ICategory} from "@/apis/category";
 // 引入独立API
 const {message, dialog} = UseDiscreteAPI();
 
-interface ICategory {
-  id: number
-  name: string
-}
 
 // 为play方法增加一个参数，以区分点击的是【修改】按钮还是【删除】按钮
 function createColumns({play}: {
@@ -84,20 +81,16 @@ function createColumns({play}: {
   ]
 }
 
-const data: ICategory[] = [
-  {id: 3, name: 'Wonderwall'},
-  {id: 4, name: 'Don\'t Look Back in Anger'},
-  {id: 12, name: 'Champagne Supernova'}
-]
-
 export default defineComponent({
   setup() {
     // 修改分类时，模态框的显示和隐藏
     const showModal = ref(false)
-    // 修改弹出的模态框中，分类值
-    const catValue = ref("");
+    // 修改弹出的模态框中，分类记录：id值和name值
+    const catValue = ref<ICategory>({id: 0, name: ''});
     // 维护一个状态量，number类型，0：添加分类；1：修改分类
     const status = ref(0);
+    // 定义一个数据，存储获取的分类列表
+    const catList = ref<ICategory[]>([]);
 
     const columns = createColumns({
       play(row: ICategory, title: string) {
@@ -107,7 +100,8 @@ export default defineComponent({
           // 弹出模态框
           showModal.value = true
           // 将当前分类，回显到弹出的模态框中
-          catValue.value = row.name;
+          catValue.value.name = row.name;
+          catValue.value.id = row.id;
           // 将status值修改为1
           status.value = 1;
 
@@ -129,6 +123,24 @@ export default defineComponent({
       }
     });
     /**
+     * @获取分类列表
+     *
+     *
+     *
+     *
+     * */
+    const getCatList = async () => {
+      // 拿到最新的分类值
+      const res = await getCatAPI();
+      if (res.data.code === 200) {// 分类列表查询操作成功了
+        catList.value = res.data.data;
+      }
+
+    }
+    onMounted(() => {
+      getCatList();
+    })
+    /**
      * @name:addCat
      * @description:添加分类 按钮，点击后，事件处理函数
      * 复用 修改 按钮的那个对话框
@@ -138,7 +150,7 @@ export default defineComponent({
       // 1.弹出对话框
       showModal.value = true;
       // 2.内容区域，文本输入框内容清空
-      catValue.value = "";
+      catValue.value.name = "";
       // 将status值置为0，表示当前 添加分类
       status.value = 0;
 
@@ -152,15 +164,39 @@ export default defineComponent({
      *
      *
      * */
-    const submitChange = () => {
+    const submitChange = async () => {
       if (status.value === 1) {// 修改分类时，提交
+        // 将分类提交至后端
+        // console.log("test", catValue.value);
+        const res = await changeCatAPI(catValue.value);
+        console.log(res);
+        if (res.data.code === 200) {
+          // 1.给出"分类修改成功"提示
+          message.success('当前分类已成功修改');
+          // 2.关闭对话框
+          showModal.value = false;
+          // 3.重新请求分类列表
+          await getCatList();
+        } else {
+          message.error(res.data.message);
+        }
 
       } else {// 添加分类时，提交
-
+        const res = await addCatAPI(catValue.value.name);
+        if (res.data.code === 200) {// 添加分类成功
+          // 1.给出"分类添加成功"提示
+          message.success('当前分类已经成功添加');
+          // 2.关闭对话框
+          showModal.value = false;
+          // 3.重新请求分类列表
+          await getCatList();
+        } else {
+          message.error(res.data.message);
+        }
       }
     }
     return {
-      data,
+      catList,
       columns,
       showModal,
       catValue,

@@ -7,6 +7,7 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const bodyParser = require('body-parser');
+const router = require('./src/router/router');
 // 请求体解析器bodyParse处理不同格式的数据
 // 处理application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({
@@ -28,7 +29,7 @@ app.all("*", (req, res, next) => {
 	}
 });
 // 路由处理
-app.use(require("./src/router/adminRouter"));
+app.use(router);
 const PORT = 8081;
 app.listen(`${PORT}`, () => {
 	console.log(`server is running at ${PORT}`);
