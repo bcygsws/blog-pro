@@ -71,6 +71,10 @@
 
   .mark {
     font-size: 64px;
+    position: fixed;
+    bottom: 20px;
+    right: calc((100vw - 1200px) / 2);
+    color: rgba(0, 0, 0, 20%);
   }
 }
 

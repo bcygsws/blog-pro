@@ -4,12 +4,13 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "skipLibCheck": true,
     "module": "ESNext",
+    /*都配置为node,避免引入@/**.ts文件报错*/
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "noEmit": true,
     /*让@路径别名，具有路径联想功能*/
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "@/*": [
         "./src/*"

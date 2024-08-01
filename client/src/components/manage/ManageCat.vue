@@ -37,7 +37,7 @@ import {defineComponent, h, onMounted, ref} from 'vue';
 import {NButton} from 'naive-ui'
 import type {DataTableColumns} from 'naive-ui';
 import UseDiscreteAPI from "@/utils/useDiscreteAPI.ts";
-import {addCatAPI, changeCatAPI, getCatAPI, ICategory} from "@/apis/category";
+import {addCatAPI, changeCatAPI, getCatAPI, ICategory, delCatAPI} from "@/apis/category";
 // 引入独立API
 const {message, dialog} = UseDiscreteAPI();
 
@@ -90,7 +90,7 @@ export default defineComponent({
     // 维护一个状态量，number类型，0：添加分类；1：修改分类
     const status = ref(0);
     // 定义一个数据，存储获取的分类列表
-    const catList = ref<ICategory[]>([]);
+    const catList = ref<ICategory[] | undefined>([]);
 
     const columns = createColumns({
       play(row: ICategory, title: string) {
@@ -98,7 +98,7 @@ export default defineComponent({
         console.log(title);
         if (title === '修改') {
           // 弹出模态框
-          showModal.value = true
+          showModal.value = true;
           // 将当前分类，回显到弹出的模态框中
           catValue.value.name = row.name;
           catValue.value.id = row.id;
@@ -112,8 +112,18 @@ export default defineComponent({
             content: '你确定删除这条数据吗？',
             positiveText: '确定',
             negativeText: '取消',
-            onPositiveClick: () => {
-              message.success('确定');
+            onPositiveClick: async () => {
+              // 1.确认删除后，将数据提交到服务端
+              const res = await delCatAPI(row.id);
+              if (res.data.code === 200) {
+                // 1.删除成功提示
+                message.success(res.data.message);
+                // 2.重新请求分类列表
+                await getCatList();
+              } else {// 点击 确定 按钮后，数据删除仍然失败了
+                message.error(res.data.message);
+              }
+
             },
             onNegativeClick: () => {
             }
@@ -216,8 +226,6 @@ export default defineComponent({
     margin: 5px 0;
   }
 
-  .content {
-  }
 }
 
 </style>

@@ -6,12 +6,12 @@ import ResType from './shared.ts';
 import http from '@/utils/http';
 
 // login返回对象数据类型
-interface ILogin {
-    id: number;
-    account: string;
-    password: string;
-    token: string;
-}
+// interface ILogin {
+//     id: number;
+//     account: string;
+//     password: string;
+//     token: string;
+// }
 
 export type IForm = {
     account: string;
@@ -36,7 +36,7 @@ export  type IParams = {
  * */
 const loginAPI = (params: IParams) => {
     // 返回一个Promise
-    return http.request<ResType<ILogin>>({
+    return http.request<ResType<string>>({
         url: '/login',
         method: 'POST',
         data: params

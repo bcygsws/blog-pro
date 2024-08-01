@@ -11,8 +11,8 @@
       "DOM.Iterable"
     ],
     "skipLibCheck": true,
-    /* Bundler mode */
-    "moduleResolution": "bundler",
+    /* Bundler mode: 都改为node,否则即使设置了别名，引入ts文件仍然报错误提示*/
+    "moduleResolution": "node",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -25,7 +25,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     /*让@路径别名，具有路径联想功能*/
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "@/*": [
         "./src/*"

@@ -4,17 +4,18 @@
  *
  * */
 
-// 1.获取token
+
+
+// 1.存储token
+function setToken(token: string) {
+    localStorage.setItem('MY_TOKEN', token);
+}
+// 2.获取token
 
 function getToken() {
     return localStorage.getItem(' MY_TOKEN');
 }
 
-// 2.存储token
-
-function setToken(token: string) {
-    localStorage.setItem('MY_TOKEN', token);
-}
 
 // 3.根据存储键，清除localStorage中存储内容
 function clear(key: string) {

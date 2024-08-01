@@ -16,7 +16,7 @@ export default defineConfig({
     plugins: [vue()],
     resolve: {// src路径别名配置
         alias: {// 需要安装识别path和__dirname的模块@types/node
-            '@': path.resolve(__dirname, 'src')
+            '@': path.join(__dirname, './src')
         }
     },
     css: {

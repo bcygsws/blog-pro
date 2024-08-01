@@ -14,7 +14,8 @@ export interface ICategory {
 
 function getCatAPI() {
     return http.request<ResType<ICategory[]>>({
-        url: '/manage_cat'
+        url: '/manage_cat',
+        // method:'GET' // 请求方式为get时，可以省略
     });
 }
 
@@ -41,8 +42,17 @@ function addCatAPI(val: string) {
     });
 }
 
+// 4.删除分类
+function delCatAPI(id: number) {
+    return http.request({
+        url: `/manage_cat/${id}`,
+        method: 'DELETE'
+    });
+}
+
 export {
     getCatAPI,
     changeCatAPI,
-    addCatAPI
+    addCatAPI,
+    delCatAPI
 }

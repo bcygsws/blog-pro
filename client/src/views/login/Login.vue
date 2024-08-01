@@ -134,7 +134,8 @@ export default defineComponent({
         console.log(res);
         if (res.data.code === 200) {// 登录成功
           // 密码在后端已经强制，置空了，密码从文本框中取值
-          const {token} = res.data.data;
+          const token = res.data.data!;
+          console.log("test token",token);
           message.success('恭喜你，登录成功');
           // 1.更新store中变量的状态
           loginStore.$patch({
@@ -147,7 +148,6 @@ export default defineComponent({
             localStorage.setItem('account', model.value.account);
             localStorage.setItem('password', encode(model.value.password));
             localStorage.setItem('remember', model.value.remember ? '1' : '0');
-
           }
           // 4.跳转至/dashboard
           await router.push("/dashboard");
