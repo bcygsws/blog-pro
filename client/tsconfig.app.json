@@ -4,6 +4,8 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2020",
     "useDefineForClassFields": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "module": "ESNext",
     "lib": [
       "ES2020",
@@ -13,7 +15,6 @@
     "skipLibCheck": true,
     /* Bundler mode: 都改为node,否则即使设置了别名，引入ts文件仍然报错误提示*/
     "moduleResolution": "node",
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "moduleDetection": "force",
@@ -34,7 +35,7 @@
     /*naive ui框架对Volar的支持*/
     "types": [
       "naive-ui/volar"
-    ]
+    ],
   },
   "include": [
     "src/**/*.ts",

@@ -8,8 +8,6 @@ import {defineStore} from "pinia";
  * */
 const useLogin = defineStore('login', {
     state: () => ({
-        account: '',
-        password: '',
         token: ''
     }),
     getters: {},

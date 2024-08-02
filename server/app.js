@@ -39,6 +39,7 @@ app.all("*", (req, res, next) => {
 		next();
 	}
 });
+// expJWT(密钥对象，加密算法对象).unless({path:[排除路由项]})
 app.use(
 	expJWT({secret: SECRET_KEY, algorithms: ['HS256']}).unless({path: ['/login']})
 );

@@ -1,5 +1,9 @@
 {
   "files": [],
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
   "references": [
     {
       "path": "./tsconfig.app.json"
@@ -9,6 +13,6 @@
     }
   ],
   "include": [
-    "src/**/*.ts"
+    "@/**/*.ts"
   ]
 }

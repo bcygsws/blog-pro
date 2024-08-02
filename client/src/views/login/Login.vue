@@ -134,15 +134,16 @@ export default defineComponent({
         console.log(res);
         if (res.data.code === 200) {// 登录成功
           // 密码在后端已经强制，置空了，密码从文本框中取值
-          const token = res.data.data!;
-          console.log("test token",token);
+          const token = (res.data.data)!;
+          console.log("test token", token);
           message.success('恭喜你，登录成功');
-          // 1.更新store中变量的状态
+          // 1.将token存储至本地的localStorage
+          setToken(token);
+          // 2.更新store中变量的状态
           loginStore.$patch({
             token
           });
-          // 2.将token存储至本地的localStorage
-          setToken(token);
+
           // 3.处理将账号、密码存入cookie,方便回显
           if (model.value.remember) {// 如果"记住我"框选中
             localStorage.setItem('account', model.value.account);

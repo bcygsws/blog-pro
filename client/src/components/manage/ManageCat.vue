@@ -37,7 +37,7 @@ import {defineComponent, h, onMounted, ref} from 'vue';
 import {NButton} from 'naive-ui'
 import type {DataTableColumns} from 'naive-ui';
 import UseDiscreteAPI from "@/utils/useDiscreteAPI.ts";
-import {addCatAPI, changeCatAPI, getCatAPI, ICategory, delCatAPI} from "@/apis/category";
+import {addCatAPI, changeCatAPI, getCatAPI, ICategory, delCatAPI} from "@/apis/category.ts";
 // 引入独立API
 const {message, dialog} = UseDiscreteAPI();
 
@@ -134,9 +134,7 @@ export default defineComponent({
     });
     /**
      * @获取分类列表
-     *
-     *
-     *
+     * bug:刷新当前页面后，pinia数据恢复到
      *
      * */
     const getCatList = async () => {
@@ -148,6 +146,8 @@ export default defineComponent({
 
     }
     onMounted(() => {
+      // 刷新页面时，现将token读取出来
+      console.log(localStorage.getItem("MY_TOKEN"));
       getCatList();
     })
     /**

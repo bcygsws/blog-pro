@@ -70,11 +70,11 @@
   }
 
   .mark {
-    font-size: 64px;
+    font-size: 60px;
     position: fixed;
-    bottom: 20px;
+    bottom: 45px;
     right: calc((100vw - 1200px) / 2);
-    color: rgba(0, 0, 0, 20%);
+    color: rgba(0, 0, 0, 25%);
   }
 }
 
