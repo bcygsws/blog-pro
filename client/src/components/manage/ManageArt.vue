@@ -52,8 +52,8 @@
 </template>
 <script lang="ts">
 import {defineComponent, onMounted, Ref, ref} from "vue";
-import {getArtAPI, IList, IPage} from "@/apis/article.ts";
-import {timeFormat} from "@/utils/timeFormat.ts";
+import {getArtAPI, IList, IPage} from "@/apis/article";
+import {timeFormat} from "@/utils/timeFormat";
 
 export default defineComponent({
   methods: {timeFormat},

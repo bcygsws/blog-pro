@@ -1,6 +1,5 @@
-import ResType from './shared.ts';
-import http from "@/utils/http.ts";
-import {Ref, UnwrapRef} from "vue";
+import ResType from './shared';
+import http from "@/utils/http";
 
 // 获取文章列表API
 export type IList = {
