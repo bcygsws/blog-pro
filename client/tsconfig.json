@@ -13,6 +13,7 @@
     }
   ],
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "./custom-types.d.ts"
   ]
 }

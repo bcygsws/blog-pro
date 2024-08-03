@@ -4,7 +4,7 @@
  *
  * */
 import ResType from "@/apis/shared";
-import http from "@/utils/http.ts";
+import http from "@/utils/http";
 
 // 1.分类管理，列表获取
 export interface ICategory {

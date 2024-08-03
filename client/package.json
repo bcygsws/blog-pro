@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/node": "^18.19.42",
+    "@wangeditor/editor-for-vue": "^5.1.12",
     "axios": "^1.7.2",
     "date-fns": "^2.30.0",
     "pinia": "^2.2.0",

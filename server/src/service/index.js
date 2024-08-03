@@ -5,6 +5,8 @@
  *
  *
  * */
+const fs = require('fs');
+const path = require('path');
 const {Query} = require("../mysql/mysql");
 // 用以以简单方式产生token
 const {v4: uuidv4} = require('uuid');
@@ -233,7 +235,7 @@ exports.getBlog = async (req, res) => {
 	const p2 = Query(sql, data.concat([(page - 1) * pageSize, pageSize]));// 需要concat分页的两个参数?,? 第一个参数：当前数据的编号数（第一条数据，编号是0）；第二个参数：每页的容量
 
 	const rows = await Promise.all([p1, p2]);
-	// console.log(rows);// [[],[]]
+	console.log(rows);// [[],[]]
 	// console.log("test", rows[0]);
 	if (rows.length > 0) {
 		res.send({
@@ -254,7 +256,7 @@ exports.getBlog = async (req, res) => {
 }
 /**
  * @文章列表的删除
- * 访问地址：访问地址：http://localhost:8081/manage_art/:id
+ * 访问地址：http://localhost:8081/manage_art/:id
  *
  * */
 exports.deleteArtById = async (req, res) => {
@@ -274,7 +276,94 @@ exports.deleteArtById = async (req, res) => {
 		})
 	}
 }
+/**
+ * @文章列表的添加
+ * 访问地址：http://localhost:8081/manage_art
+ * 请求方式：post
+ * body参数
+ * 时间戳5种方式：(new Date()).getTime()  (new Date()).valueOf() Date.now() Number(new Date())  Date.parse(new Date())
+ *
+ * */
+exports.addArt = async (req, res) => {
+	const {categoryId, title, content} = req.body;
+	const sql = "insert into `blog`(`id`,`category_id`,`title`,`content`,`create_time`) values(?,?,?,?,?)";
+	const info = {
+		id: genid.NextId(),
+		category_id: parseInt(categoryId),
+		title: title,
+		content: content,
+		create_time: (new Date()).getTime()
+	}
+	const rows = await Query(sql, [info.id, info.category_id, info.title, info.content, info.create_time]);
+	// console.log("mytest", rows);
+	// console.log("mytest", rows.affectedRows);
+	if (rows.affectedRows) {
+		res.send({
+			code: 200,
+			message: '添加成功'
+		})
+	} else {
+		res.send({
+			code: 500,
+			message: '添加失败'
+		})
+	}
 
+}
+/**
+ * @本地图片上传接口
+ * 请求地址：
+ *
+ *
+ *
+ * */
+exports.uploadImage = async (req, res) => {
+	if (!req.files) {// 如果上传文件不存在
+		res.send({
+			errno: 1, // 只要不等于 0 就行
+			message: "失败信息"
+		})
+	} else {
+		console.log(req.files);
+		/*
+		打印结果：
+		[{
+           fieldname: 'files',
+           originalname: '特温特.jpg',
+           encoding: '7bit',
+           mimetype: 'image/jpeg',
+           destination: './public/upload/temp',
+           filename: '075fc5fc5eb1f8c2606efc7a79471265',
+           path: 'public\\upload\\temp\\075fc5fc5eb1f8c2606efc7a79471265',
+           size: 273591
+         }]
+		 */
+		//定义数组，存储拼接好的图片的url地址
+		let uploadFiles = [];
+		for (let file of req.files) {
+			// 1.获取文件名后缀，例如：jpg，从字符j开始截取到最后面，可以获得后缀名称
+			const ext_name = file.originalname.substring(file.originalname.indexOf(".") + 1)
+			// 2.定义文件名称
+			let full_name = genid.NextId() + "." + ext_name;
+			// 3.使用文件系统重命名方法renameSync，完成上传图片文件的重命名更改文件存储路径
+			// process.cwd()方法：表示获取当前项目的工作路径，拼接后，是临时文件的绝对路径
+			fs.renameSync(path.join(process.cwd(), "./public/upload/temp", file.filename), path.join(process.cwd(), "./public/upload", full_name));
+			// 4.将移动路径+重命名的文件，存入数组uploadFiles
+			uploadFiles.push("/upload/" + full_name);
+			// 5.返回信息，给前端
+			res.send({
+				"errno": 0, // 注意：值是数字，不能是字符串
+				"data": {
+					"url": uploadFiles[0], // 图片 src,必须
+					"alt": "本地上传图片",// 图片的描述文字，非必须
+					"href": ""// 图片的链接，非必须
+				}
+			});
+
+		}
+
+	}
+}
 
 
 

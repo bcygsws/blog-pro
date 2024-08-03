@@ -32,8 +32,8 @@
       </n-layout>
     </n-layout>
     <!--水印-->
-    <div class="mark">后台管理系统</div>
   </div>
+  <div class="mark">后台管理系统</div>
 
 </template>
 <script lang="ts">
@@ -42,6 +42,9 @@
 
 <style lang="scss" scoped>
 .dash-container {
+  position: relative;
+  z-index: 9;
+
   .slider {
     width: 100%;
     display: flex;
@@ -68,14 +71,14 @@
       color: #ffffff;
     }
   }
-
-  .mark {
-    font-size: 60px;
-    position: fixed;
-    bottom: 45px;
-    right: calc((100vw - 1200px) / 2);
-    color: rgba(0, 0, 0, 25%);
-  }
+}
+.mark {
+  font-size: 60px;
+  position: fixed;
+  bottom: 45px;
+  right: calc((100vw - 1200px) / 2);
+  color: rgba(0, 0, 0, 25%);
+  z-index: 999;
 }
 
 </style>

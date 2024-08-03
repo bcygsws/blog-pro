@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {getToken} from "./token.ts";
+import {getToken} from "./token";
 
 
 const http = axios.create({
