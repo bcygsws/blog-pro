@@ -8,11 +8,11 @@
     <!--justify-content flex布局下的，主轴的排列方式-->
     <n-tabs
         type="line"
-        animated j
-        ustify-content="space-evenly"
-        :on-update:value="handleTabsChange"
+        justify-content="space-evenly"
+        @update:value="handleTabsChange"
         ref="tabsInstRef"
         v-model:value="tab_value"
+        animated
     >
       <n-tab-pane name="list" tab="文章列表">
         <div class="list">
@@ -40,8 +40,8 @@
                 :item-count="count"
                 show-size-picker
                 :page-sizes="[4,5,10,20,40]"
-                :on-update:page="pageChange"
-                :on-update:page-size="pageSizeChange"
+                @update:page="pageChange"
+                @update:page-size="pageSizeChange"
 
             />
           </div>
@@ -53,21 +53,22 @@
           <ArtFormItem
               ref="myRef"
               :model="model"
-              :handleValidateClick="handleValidateClick"
-              :name="btnName"
+              :handleAddValidate="handleAddValidate"
+              :name="tab_value"
           >
 
           </ArtFormItem>
         </div>
       </n-tab-pane>
+      <!--数据回显+提交修改-->
       <n-tab-pane name="edit" tab="修改文章">
         <div class="add-art">
           <ArtFormItem
-              ref="myRef"
+              ref="myRef2"
               :model="model_change"
-              :handleValidateClick="handleValidateClick"
+              :handleModifiedValidate="handleModifiedValidate"
               :generalOptions="generalOptions"
-              :name="btnName"
+              :name="tab_value"
           >
           </ArtFormItem>
         </div>
@@ -77,11 +78,20 @@
 </template>
 <script lang="ts" setup>
 import {nextTick, onMounted, Ref, ref} from "vue";
-import {addArtAPI, delArtByIdAPI, getArtAPI, getArtByIdAPI, IList, IPage} from "@/apis/article";
+import {
+  addArtAPI,
+  delArtByIdAPI,
+  getArtAPI,
+  getArtByIdAPI,
+  IList,
+  IModel,
+  IPage,
+  submitModifiedAPI
+} from "@/apis/article";
 import {timeFormat} from "@/utils/timeFormat";
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
 import {getCatAPI, ICategory} from "@/apis/category";
-import ArtFormItem from "@/components/manage/ArtFormItem.vue";
+import ArtFormItem from "@/components/manage/item/ArtFormItem.vue";
 import {TabsInst} from "naive-ui";
 
 const {message} = useDiscreteAPI();
@@ -97,11 +107,7 @@ const count = ref<number | undefined>(0);
 const artList = ref<IList[] | undefined>([]);
 
 // 添加列表时，表单数据对象model
-interface IModel {
-  categoryId: string | null;
-  title: string;
-  content: string;
-}
+
 
 const model = ref<IModel>({
   title: '',
@@ -125,11 +131,10 @@ interface IOptions {
 const generalOptions = ref<IOptions[]>([]);
 // 用于从子组件属性中，获取ArtForm暴露给父组件的DOM对象
 const myRef = ref(null);
-// 维护一个状态，0：表示添加，1：表示修改
-const btnName = ref('');
+const myRef2 = ref(null);
 // 获取tabs对象
 const tabsInstRef = ref<TabsInst | null>(null);
-const tab_value = ref('list');
+const tab_value = ref('add');
 
 const getArtList = async (val: Ref<IPage>) => {
   const res = await getArtAPI(val.value);
@@ -192,9 +197,8 @@ const delHandler = async (id: number) => {
  * @点击按钮，添加文章列表
  *
  * */
-const handleValidateClick = (e: MouseEvent) => {
+const handleAddValidate = (e: MouseEvent) => {
   e.preventDefault();
-  console.log("我执行了吗？1");
   console.log(myRef.value);
   console.log(myRef.value.sonRef);
   // console.log(myRef.value.sonRef);
@@ -208,14 +212,49 @@ const handleValidateClick = (e: MouseEvent) => {
         message.success('添加成功');
         // 更新文章列表
         await getArtList(pageInfo);
-
+        model.value.categoryId = null;
+        model.value.title = model.value.content = '';
+      } else {
+        message.error('添加失败');
       }
 
     } else {
-      console.log(errors);
-      message.error('验证失败');
+      message.error('表单验证失败');
     }
   })
+}
+/**
+ * @name:handleModifiedValidate
+ * @description:点击【修改】按钮，提交修改
+ *
+ *
+ * */
+const handleModifiedValidate = (e: MouseEvent) => {
+  e.preventDefault();
+  myRef2.value.sonRef.validate(async (errors) => {
+    if (!errors) {
+      const res = await submitModifiedAPI(model_change.value);
+      if (res.data.code === 200) {
+        // 1.提示信息
+        message.success('修改成功');
+        // 2.重新请求博客列表
+        await getArtList(pageInfo);
+        // 3.tabs标签页，跳转回博客列表页
+        // 3.1更改tab值
+        tab_value.value = 'list';
+        // 3.2 滚动条同步更新
+        await nextTick(() => tabsInstRef.value?.syncBarPosition());
+        // 3.3 修改文章表单置空
+        model_change.value.categoryId = null;
+        model_change.value.content = model_change.value.title = ''
+      } else {
+        message.error('修改失败');
+      }
+    } else {
+      message.error('表单验证失败');
+    }
+  })
+
 }
 /**
  * @name:handleTabsChange
@@ -225,7 +264,8 @@ const handleValidateClick = (e: MouseEvent) => {
  * */
 const handleTabsChange = (val: string) => {
   console.log(val);
-  btnName.value = val;
+  tab_value.value = val;
+  nextTick(() => tabsInstRef.value?.syncBarPosition());
 }
 /**
  * @name:changeHandler
@@ -237,7 +277,8 @@ const changeHandler = async (id: number) => {
   // 根据id查询数据，回显到表单中
   const res = await getArtByIdAPI(id);
   if (res.data.code === 200) {
-    const {category_id, title, content} = res.data.data!;
+    const {id, category_id, title, content} = res.data.data!;
+    model_change.value.id = id;
     model_change.value.categoryId = category_id.toString();
     model_change.value.title = title;
     model_change.value.content = content;
@@ -250,6 +291,7 @@ const changeHandler = async (id: number) => {
   await nextTick(() => tabsInstRef.value?.syncBarPosition());
 
 }
+
 </script>
 
 <style lang="scss" scoped>

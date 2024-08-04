@@ -25,6 +25,8 @@ app.use(bodyParser.urlencoded({
 // 处理application/json格式数据
 app.use(bodyParser.json());
 // 服务端访问静态资源(访问上传的图片，需要设置静态资源托管路径)
+// 修改文章列表 记录时，图片在富文本编辑器中回显，必须设置图片托管在public以下的文件夹中
+// 例如：http://localhost:8081/upload/570090275553349.jpg
 app.use(express.static(path.join(__dirname, 'public')));
 // 上传的模块引入
 const upload = multer({// options配置项，最基本的属性就是dest,用于设定上传图片的临时路径

@@ -59,9 +59,24 @@ const getArtByIdAPI = (id: number) => {
     })
 
 }
+// 5.put方法，提交body参数提交博客列表记录的修改
+export type IModel = {
+    id? : number;
+    categoryId: string | null;
+    title: string;
+    content: string;
+}
+const submitModifiedAPI = (val: IModel) => {
+    return http.request({
+        url: `/manage_art`,
+        method: 'PUT',
+        data: val
+    })
+}
 export {
     getArtAPI,
     delArtByIdAPI,
     addArtAPI,
-    getArtByIdAPI
+    getArtByIdAPI,
+    submitModifiedAPI
 }

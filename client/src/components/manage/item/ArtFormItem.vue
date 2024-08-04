@@ -28,9 +28,8 @@
       <wang-editor v-model="model.content"></wang-editor>
     </n-form-item>
     <div style="display: flex; justify-content: flex-end">
-      <n-button round type="primary" @click="handleValidateClick">
-        {{ name === 'add' ? '添加' : '修改'}}
-      </n-button>
+      <n-button round type="primary" v-if="name==='add'" @click="handleAddValidate">添加</n-button>
+      <n-button round type="primary" @click="handleModifiedValidate" v-else>修改</n-button>
     </div>
   </n-form>
   <pre>{{ model.content }}</pre>
@@ -44,7 +43,7 @@ import {FormInst} from "naive-ui";
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
 
 const {message} = useDiscreteAPI();
-defineProps(['model', 'handleValidateClick', 'generalOptions','name']);
+defineProps(['model', 'handleAddValidate', 'handleModifiedValidate', 'generalOptions', 'name']);
 // 分类列表catList
 const catList = ref<ICategory[]>([]);
 // 表单数据对象model
@@ -103,5 +102,6 @@ defineExpose({sonRef});
 </script>
 
 <style lang="scss" scoped>
+
 
 </style>

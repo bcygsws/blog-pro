@@ -2,7 +2,7 @@
  * @name:登录相关的API编写
  *
  * */
-import ResType from './shared.ts';
+import ResType from './shared';
 import http from '@/utils/http';
 
 // login返回对象数据类型
