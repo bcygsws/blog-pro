@@ -312,8 +312,8 @@ exports.addArt = async (req, res) => {
 }
 /**
  * @本地图片上传接口
- * 请求地址：
- *
+ * 请求地址：http://localhost:8081/manage_art//upload/rich_editor_upload
+ * 请求方式：post
  *
  *
  * */
@@ -364,7 +364,58 @@ exports.uploadImage = async (req, res) => {
 
 	}
 }
-
+/**
+ * @根据id,请求数据
+ * 请求地址：http://localhost:8081/manage_art/:id
+ *
+ *
+ * */
+exports.getArtById = async (req, res) => {
+	const {id} = req.params;
+	const sql = "select * from `blog` where `id`=?";
+	const rows = await Query(sql, [id]);
+	// console.log(rows);
+	if (rows.length > 0) {
+		res.send({
+			code: 200,
+			message: '当前记录回显成功',
+			data: rows[0]
+		});
+	} else {
+		res.send({
+			code: 500,
+			message: '当前记录请求失败'
+		});
+	}
+}
+/**
+ * @修改数据
+ * 请求地址：http://localhost:8081/manage_art
+ * body参数：
+ * id: number
+ * categoryId: string
+ * title: string
+ * content: string
+ *
+ *
+ * */
+exports.submitArt = async (req, res) => {
+	const {id, categoryId, title, content} = req.body;
+	const sql = "update `blog` set `category_id`=?,`title`=?,`content`=?,`create_time`=? where `id`=?";
+	const rows = await Query(sql, [categoryId, title, content, Date.now(), id]);
+	console.log(rows);
+	if (rows.affectedRows) {
+		res.send({
+			code: 200,
+			message: '文章记录修改成功'
+		});
+	} else {
+		res.send({
+			code: 500,
+			message: '文章记录修改失败'
+		});
+	}
+}
 
 
 

@@ -6,7 +6,10 @@
 const express = require('express');
 const router = express.Router();
 const {v4: uuidv4} = require('uuid');
-const {loginService, getCat, deleteCatById, putCatById, addCat, getBlog, deleteArtById, addArt, uploadImage} = require("../service");
+const {
+	loginService, getCat, deleteCatById, putCatById, addCat, getBlog, deleteArtById, addArt, uploadImage, getArtById,
+	submitArt
+} = require("../service");
 const {Query} = require('../mysql/mysql');
 // 获取expJWT方法
 const {expressjwt: expJWT} = require('express-jwt');
@@ -32,8 +35,11 @@ router.delete('/manage_art/:id', authenticateJwt, deleteArtById);
 // 8.博客文章列表的添加
 router.post('/manage_art', authenticateJwt, addArt);
 // 9.本地图片上传接口
-router.post('/upload/rich_editor_upload', authenticateJwt, uploadImage)
-
+router.post('/upload/rich_editor_upload', authenticateJwt, uploadImage);
+// 10.博客修改数据回显
+router.get('/manage_art/:id', authenticateJwt, getArtById)
+// 11.博客修改后提交
+router.put('/manage_art', authenticateJwt, submitArt);
 
 module.exports = router;
 

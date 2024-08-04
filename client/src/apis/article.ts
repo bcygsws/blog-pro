@@ -52,8 +52,16 @@ const addArtAPI = (val: UnwrapRef<{ title: string; content: string; categoryId: 
     })
 
 }
+// 4.根据id,查询博客列表中的一条记录
+const getArtByIdAPI = (id: number) => {
+    return http.request<ResType<IList>>({
+        url: `/manage_art/${id}`
+    })
+
+}
 export {
     getArtAPI,
     delArtByIdAPI,
-    addArtAPI
+    addArtAPI,
+    getArtByIdAPI
 }

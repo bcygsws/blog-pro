@@ -19,7 +19,7 @@
 <script>
 import '@wangeditor/editor/dist/css/style.css'; // 引入 css
 
-import {onBeforeUnmount, ref, shallowRef, onMounted, defineComponent} from 'vue'
+import {onBeforeUnmount, ref, shallowRef, onMounted, defineComponent, watchEffect} from 'vue'
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue';
 import http from '@/utils/http';
 import {getToken} from "@/utils/token";
@@ -33,7 +33,7 @@ export default defineComponent({
     // 父组件的方法 update:model-value(是一个暴露给子组件的方法名)
     modelValue: {
       type: String,
-      default: ''
+      required: true
     }
   },
   setup(props, {emit}) {
@@ -54,7 +54,11 @@ export default defineComponent({
         valueHtml.value = props.modelValue;
         init.value = true;
       }, 10);
-    })
+    });
+    // modelValue值改变时，valueHtml也改变
+    watchEffect(() => {
+      valueHtml.value = props.modelValue;
+    });
 
     const toolbarConfig = {
       // 1.禁用部分工具栏，插入视频操作，需要寻找【上传本地视频】的key值
@@ -89,7 +93,7 @@ export default defineComponent({
     // 组件销毁时，也及时销毁编辑器
     onBeforeUnmount(() => {
       const editor = editorRef.value;
-      if (editor == null) return
+      if (editor == null) return;
       editor.destroy();
     })
 

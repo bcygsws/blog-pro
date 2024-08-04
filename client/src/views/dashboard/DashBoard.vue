@@ -72,12 +72,13 @@
     }
   }
 }
+
 .mark {
   font-size: 60px;
   position: fixed;
   bottom: 45px;
-  right: calc((100vw - 1200px) / 2);
-  color: rgba(0, 0, 0, 25%);
+  right: calc((100vw - 1500px) / 2);
+  color: rgba(0, 0, 0, 30%);
   z-index: 999;
 }
 

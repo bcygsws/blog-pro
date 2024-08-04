@@ -11,7 +11,7 @@ const http = axios.create({
 http.interceptors.request.use(config => {
     // 后端返回的数据中，已经添加了bearer 字符，设置请求头时就不用拼串了
     let token = getToken();
-    console.log('http', token);
+    // console.log('http', token);
     config.headers.Authorization = `${token}`;
     return config;
 }, (err) => {
