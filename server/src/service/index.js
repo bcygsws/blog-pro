@@ -208,6 +208,7 @@ exports.getBlog = async (req, res) => {
 	page = page ? parseInt(page) : 1;
 	pageSize = pageSize ? parseInt(pageSize) : 5;
 	categoryId = categoryId ? parseInt(categoryId) : 0;
+	keywords = keywords ? keywords : "";
 	// 不传分类id时，categoryId已经置为0；那么，categoryId只有0，和其他大于0的情况
 	let whereSQL = [];
 	let data = [];
@@ -216,26 +217,28 @@ exports.getBlog = async (req, res) => {
 		data.push(categoryId);
 	}
 	if (keywords) {
-		whereSQL.push('(`title` like ? or `content` like ?)');
-		data.push(`%${keywords}%`);
-		data.push(`%${keywords}%`);
+		whereSQL.push("(`title` like? or `content` like?)");
+		data.push("%" + keywords + "%");
+		data.push("%" + keywords + "%");
 	}
 	let join_sql = '';
 	if (whereSQL.length > 0) {// 表示按照分类id查询或者关键字模糊查询，至少有一个存在
 		// whereSQL中有一个元素时，join方法处理后，返回元素本身
-		join_sql = 'where ' + whereSQL.join(' and ');
+		join_sql = 'where ' + whereSQL.join('and');
 	}
 	// let sql = 'select *from `blog` ' + join_sql + ' order by `create_time` desc limit ?,?';
 	// 限制，content字段长度不超过50个字符
-	let sql = "select `id`,`category_id`,`title`,SUBSTR(`content`, 1, 80) as content,`create_time` from `blog` " + join_sql + " order by `create_time` desc limit ?,?";
+	//let sql = "select `id`,`category_id`,`title`,SUBSTR(`content`, 1, 80) as content,`create_time` from `blog` " + join_sql + " order by `create_time` desc limit ?,?";
+	let sql = "select `id`,`category_id`,`title`,SUBSTR(`content`, 1, 80) as content,`create_time` from `blog` " + join_sql + " order by `create_time` desc limit ? offset ?";
 	// blog列表的数据总数量，也需要返回前端
 	let countSQL = 'select count(*) as count from `blog`' + join_sql;
-	const p1 = Query(countSQL, data);// 只是获取满足条件的数据总数，与分页的两个参数无关，不需要concat
+	const p1 =  Query(countSQL, data);// 只是获取满足条件的数据总数，与分页的两个参数无关，不需要concat
 	// array.concat()方法返回一个新数组，但不会更改原数组
-	const p2 = Query(sql, data.concat([(page - 1) * pageSize, pageSize]));// 需要concat分页的两个参数?,? 第一个参数：当前数据的编号数（第一条数据，编号是0）；第二个参数：每页的容量
-
+	//const p2 = Query(sql, data.concat([(page - 1) * pageSize, pageSize]));// 需要concat分页的两个参数?,? 第一个参数：当前数据的编号数（第一条数据，编号是0）；第二个参数：每页的容量
+	const p2 = Query(sql, data.concat([pageSize, (page - 1) * pageSize]));// 需要concat分页的两个参数?,? 第一个参数：当前数据的编号数（第一条数据，编号是0）；第二个参数：每页的容量
+	//
 	const rows = await Promise.all([p1, p2]);
-	console.log(rows);// [[],[]]
+	//console.log(rows);// [[],[]]
 	// console.log("test", rows[0]);
 	if (rows.length > 0) {
 		res.send({

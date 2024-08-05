@@ -16,7 +16,7 @@ interface IData {
     list: IList[]
 }
 
-export type IPage = {
+export interface IPage {
     categoryId: number;
     page: number;
     pageSize: number;
@@ -61,7 +61,7 @@ const getArtByIdAPI = (id: number) => {
 }
 // 5.put方法，提交body参数提交博客列表记录的修改
 export type IModel = {
-    id? : number;
+    id?: number;
     categoryId: string | null;
     title: string;
     content: string;

@@ -1,7 +1,7 @@
 <!--
-*@name: MainView.vue
+*@name: FrontItem.vue
 *@author: Bao Chengyi
-*@date: 2024/7/24 21:22
+*@date: 2024/8/06 01:20
 -->
 <template>
   <div class="n-view">
@@ -24,7 +24,7 @@
         >
           {{ item.content }}
           <template #footer>
-            发布时间：{{ timeFormat(item.create_time) }}
+            发布时间：{{ timeFormat(item['create_time']) }}
           </template>
         </n-card>
       </div>
@@ -45,62 +45,38 @@
 
 </template>
 <script lang="ts" setup>
-import {onMounted, ref, Ref} from "vue";
-import {getArtAPI, IList, IPage} from "@/apis/article";
 import {timeFormat} from "@/utils/timeFormat";
+import { IList} from "@/apis/article";
 
-const pageInfo = ref<IPage>({
-  categoryId: 0,
-  page: 1,
-  pageSize: 4,
-  keywords: ''
-});
-// 博客文章总记录数
-const total = ref(0);
-// 定义数组，存储文章列表
-const artList = ref<IList[] | undefined>([]);
-
-/**
- * @name:getArtList
- * @description:获取文章列表
- *
- * */
-const getArtList = async (val: Ref<IPage>) => {
-  const res = await getArtAPI(val.value);
-  console.log(res.data);
-  if (res.data.code === 200) {
-    const {count, list} = res.data.data;
-    total.value = count;
-    artList.value = list;
-
-
+const props = defineProps({
+  pageInfo: {
+    type: Object,
+    required: true
+  },
+  artList: {
+    type: Array<IList>,
+    required: true
+  },
+  total: {
+    type: Number,
+    required: true
+  },
+  pageChange: {
+    type: Function,
+    required: true
+  },
+  pageSizeChange: {
+    type: Function,
+    required: true
+  },
+  handleSearch: {
+    type: Function,
+    required: true
   }
+});
 
-}
-onMounted(() => {
-  getArtList(pageInfo);
-})
-const pageChange = (val: number) => {
-  console.log(val);
-  pageInfo.value.page = val;
-  getArtList(pageInfo);
+console.log(props.pageInfo);
 
-}
-const pageSizeChange = (val: number) => {
-  console.log(val);
-  pageInfo.value.pageSize = val;
-  getArtList(pageInfo);
-
-}
-/**
- * @name:handleSearch
- * @description:处理关键字检索，按钮的点击事件
- *
- * */
-const handleSearch = () => {
-  console.log(pageInfo.value);
-  getArtList(pageInfo);
-}
 </script>
 
 <style lang="scss" scoped>
