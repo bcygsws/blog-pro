@@ -15,7 +15,7 @@ const routes = [
                         component: () => import("@/components/main/MainView.vue")
                     },
                     {
-                        path: '/category',
+                        path: '/category/:id',
                         component: () => import("@/components/category/CategoryView.vue")
                     }
                 ]

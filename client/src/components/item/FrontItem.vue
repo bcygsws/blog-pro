@@ -46,7 +46,7 @@
 </template>
 <script lang="ts" setup>
 import {timeFormat} from "@/utils/timeFormat";
-import { IList} from "@/apis/article";
+import {IList} from "@/apis/article";
 
 const props = defineProps({
   pageInfo: {
@@ -82,7 +82,7 @@ console.log(props.pageInfo);
 <style lang="scss" scoped>
 .n-view {
   position: absolute;
-  top: 0;
+  top: 50px;
   bottom: 0;
   width: 100%;
   padding: 15px 0;

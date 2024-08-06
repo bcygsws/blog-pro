@@ -4,6 +4,11 @@
 *@date: 2024/7/24 21:45
 -->
 <template>
+  <HeaderItem
+      :options="options"
+      :valueChanged="valueChanged"
+      :routeArg="routeArg"
+  />
   <FrontItem
       :pageInfo="pageInfo"
       :artList="artList"
@@ -15,8 +20,48 @@
 <script lang="ts" setup>
 
 import FrontItem from "@/components/item/FrontItem.vue";
-import {onMounted, ref, watchEffect} from "vue";
+import {onMounted, ref, watch, watchEffect} from "vue";
 import {getArtAPI, IList, IPage} from "@/apis/article";
+import {getCatAPI, ICategory} from "@/apis/category";
+import {useRouter} from "vue-router";
+import useDiscreteAPI from "@/utils/useDiscreteAPI";
+import HeaderItem from "@/components/header/HeaderItem.vue";
+
+const router = useRouter();
+const {message} = useDiscreteAPI();
+
+interface ILabel {
+  label: string;
+  value: string;
+}
+
+// 存储分类的数组catList
+const catList = ref<ICategory[]>([]);
+// 弹出下拉框的配置项
+let options: ILabel[] = [];
+
+// 定义变量存储路由参数
+const routeArg = ref<ICategory>({id: 0, name: ""});
+
+// 获取分类id
+const getCatList = async () => {
+  const res = await getCatAPI();
+  console.log(res);
+  if (res.data.code === 200) {
+    catList.value = res.data.data!;
+    options = catList.value.map(item => ({
+      label: item.name,
+      value: item.name
+
+    }));
+  } else {
+    // 获取分类失败
+    message.error(res.data.message);
+  }
+}
+onMounted(() => {
+  getCatList();
+});
 
 const pageInfo = ref<IPage>({
   categoryId: 0,
@@ -27,7 +72,7 @@ const pageInfo = ref<IPage>({
 // 博客文章总记录数
 const total = ref(0);
 // 定义数组，存储文章列表
-const artList = ref<IList[] | undefined>([]);
+const artList = ref<IList[]>([]);
 
 /**
  * @name:getArtList
@@ -66,6 +111,16 @@ watchEffect(() => {
     getArtList(pageInfo.value);
   }
 });
+/**
+ * @name:watchEffect
+ * @description:当分类id切换时，重新请求文章列表数据
+ *
+ * */
+watch(() => pageInfo.value.categoryId, (val: any) => {
+  console.log(typeof val);
+  getArtList({...pageInfo.value, categoryId: val});
+
+}, {immediate: true});
 
 const pageChange = (val: number) => {
   console.log(val);
@@ -87,6 +142,24 @@ const pageSizeChange = (val: number) => {
 const handleSearch = () => {
   console.log(pageInfo.value);
   getArtList(pageInfo.value);
+}
+
+const valueChanged = (val: string) => {
+  // console.log(typeof val);
+  console.log(val);
+  // console.log(value_selected.value);
+// 根据val值，也即artList中的name值，查找分类id
+  catList.value.some((item: ICategory) => {
+    if (item.name === val) {
+      routeArg.value.id = item.id;
+      pageInfo.value.categoryId = item.id;
+      routeArg.value.name = item.name;
+      return true;
+    }
+  });
+  router.push({path: `/category/${routeArg.value.id}`, query: {name: `${routeArg.value.name}`}});
+
+
 }
 </script>
 

@@ -8,4 +8,8 @@ interface ResType<T> {
     data?: T
 }
 
+export type ILabel = {
+    label: string;
+    value: string;
+}
 export default ResType;

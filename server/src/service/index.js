@@ -224,7 +224,7 @@ exports.getBlog = async (req, res) => {
 	let join_sql = '';
 	if (whereSQL.length > 0) {// 表示按照分类id查询或者关键字模糊查询，至少有一个存在
 		// whereSQL中有一个元素时，join方法处理后，返回元素本身
-		join_sql = 'where ' + whereSQL.join('and');
+		join_sql = 'where ' + whereSQL.join(' and ');
 	}
 	// let sql = 'select *from `blog` ' + join_sql + ' order by `create_time` desc limit ?,?';
 	// 限制，content字段长度不超过50个字符

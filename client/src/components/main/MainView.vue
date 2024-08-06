@@ -4,50 +4,69 @@
 *@date: 2024/7/24 21:22
 -->
 <template>
-  <div class="n-view">
-    <n-input-group>
-      <n-input v-model:value="pageInfo.keywords" :style="{ width: '35%' }" placeholder="请输入检索关键字"/>
-      <n-button type="primary" @click="handleSearch">
-        搜索
-      </n-button>
-    </n-input-group>
-    <div class="art-list">
-      <!--list列表-->
-      <div class="list">
-        <n-card
-            :title="item.title"
-            v-for="item in artList"
-            :key="item.id"
-            header-style="font-size:14px"
-            content-style="font-size:16px"
-            footer-style="font-size:14px"
-        >
-          {{ item.content }}
-          <template #footer>
-            发布时间：{{ timeFormat(item.create_time) }}
-          </template>
-        </n-card>
-      </div>
-    </div>
-    <div class="page">
-      <n-pagination
-          v-model:page="pageInfo.page"
-          v-model:page-size="pageInfo.pageSize"
-          :item-count="total"
-          show-size-picker
-          :page-sizes="[4,5,10,20,40]"
-          @update:page="pageChange"
-          @update:page-size="pageSizeChange"
-
-      />
-    </div>
-  </div>
+  <HeaderItem
+      :options="options"
+      :valueChanged="valueChanged"
+      :routeArg="routeArg"
+  />
+  <FrontItem
+      :pageInfo="pageInfo"
+      :artList="artList"
+      :total="total"
+      :pageChange="pageChange"
+      :pageSizeChange="pageSizeChange"
+      :handleSearch="handleSearch"/>
 
 </template>
 <script lang="ts" setup>
-import {onMounted, ref, Ref} from "vue";
+import FrontItem from "@/components/item/FrontItem.vue";
+import {onMounted, ref, watchEffect} from "vue";
 import {getArtAPI, IList, IPage} from "@/apis/article";
-import {timeFormat} from "@/utils/timeFormat";
+import {getCatAPI, ICategory} from "@/apis/category";
+import {useRouter} from "vue-router";
+import useDiscreteAPI from "@/utils/useDiscreteAPI";
+import HeaderItem from "@/components/header/HeaderItem.vue";
+
+const router = useRouter();
+const {message} = useDiscreteAPI();
+import {useRoute} from 'vue-router';
+
+const route = useRoute();
+console.log("testx", route.path);
+
+const value_selected = ref('')
+console.log(value_selected);
+
+interface ILabel {
+  label: string;
+  value: string;
+}
+
+// 存储分类的数组catList
+const catList = ref<ICategory[]>([]);
+// 弹出下拉框的配置项
+let options: ILabel[] = [];
+// 定义变量存储路由参数
+const routeArg = ref<ICategory>({id: 0, name: ""});
+// 获取分类id
+const getCatList = async () => {
+  const res = await getCatAPI();
+  console.log(res);
+  if (res.data.code === 200) {
+    catList.value = res.data.data!;
+    options = catList.value.map(item => ({
+      label: item.name,
+      value: item.name
+
+    }));
+  } else {
+    // 获取分类失败
+    message.error(res.data.message);
+  }
+}
+onMounted(() => {
+  getCatList();
+});
 
 const pageInfo = ref<IPage>({
   categoryId: 0,
@@ -58,15 +77,15 @@ const pageInfo = ref<IPage>({
 // 博客文章总记录数
 const total = ref(0);
 // 定义数组，存储文章列表
-const artList = ref<IList[] | undefined>([]);
+const artList = ref<IList[]>([]);
 
 /**
  * @name:getArtList
  * @description:获取文章列表
  *
  * */
-const getArtList = async (val: Ref<IPage>) => {
-  const res = await getArtAPI(val.value);
+const getArtList = async (val: IPage) => {
+  const res = await getArtAPI(val);
   console.log(res.data);
   if (res.data.code === 200) {
     const {count, list} = res.data.data;
@@ -78,18 +97,36 @@ const getArtList = async (val: Ref<IPage>) => {
 
 }
 onMounted(() => {
-  getArtList(pageInfo);
-})
+  getArtList(pageInfo.value);
+});
+/**
+ * @name:watchEffect
+ * @description:监听钩子，在total=0时，表示没有查询到相关数据
+ * 此时，pageInfo置为最初值后，重新请求列表
+ *
+ * 如果：total>0；但数组list为空；此时，是因为limit中offset过大，导致
+ * 查询不到数据，此时应该予以纠正
+ *
+ *
+ * */
+watchEffect(() => {
+  if (total.value && !artList.value?.length) {
+    pageInfo.value.page = 1;
+    pageInfo.value.categoryId = 0;
+    getArtList(pageInfo.value);
+  }
+});
+
 const pageChange = (val: number) => {
   console.log(val);
   pageInfo.value.page = val;
-  getArtList(pageInfo);
+  getArtList(pageInfo.value);
 
 }
 const pageSizeChange = (val: number) => {
   console.log(val);
   pageInfo.value.pageSize = val;
-  getArtList(pageInfo);
+  getArtList(pageInfo.value);
 
 }
 /**
@@ -99,49 +136,28 @@ const pageSizeChange = (val: number) => {
  * */
 const handleSearch = () => {
   console.log(pageInfo.value);
-  getArtList(pageInfo);
+  getArtList(pageInfo.value);
+}
+
+const valueChanged = (val: string) => {
+  // console.log(typeof val);
+  console.log(val);
+  // console.log(value_selected.value);
+// 根据val值，也即artList中的name值，查找分类id
+  catList.value.some((item: ICategory) => {
+    if (item.name === val) {
+      routeArg.value.id = item.id;
+      routeArg.value.name = item.name;
+      return true;
+    }
+  });
+  console.log(catId.value);
+  router.push({path: `/category/${routeArg.value.id}`, query: {name: `${routeArg.value.name}`}});
+
+
 }
 </script>
 
 <style lang="scss" scoped>
-.n-view {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  padding: 15px 0;
-  box-sizing: border-box;
-
-  .n-input-group {
-    justify-content: center;
-  }
-
-  .art-list {
-    position: absolute;
-    top: 64px;
-    bottom: 50px;
-    width: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-
-
-  }
-
-  .page {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-  }
-
-  .card-head {
-    font-size: 14px;
-  }
-
-}
 
 </style>

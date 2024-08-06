@@ -5,15 +5,11 @@
 -->
 <template>
   <div class="home-container">
-    <div class="header">
-      <router-link to="/main" active-class="active">首页</router-link>
-      <router-link to="/category" active-class="active">分类</router-link>
-      <router-link to="/login" active-class="active">后台</router-link>
-    </div>
     <div class="content">
       <!--组件占位符-->
       <router-view></router-view>
     </div>
+    <!--footer没有数据，和子路由组件的数据交互，保留在当前结构中-->
     <div class="footer">
       <div class="top">Powered by Bao Chengyi</div>
       <div class="bottom">XICP备xxxx号-1</div>
@@ -21,7 +17,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-
 </script>
 
 <style lang="scss" scoped>
@@ -34,37 +29,14 @@
   left: 0;
   right: 0;
 
-  .header {
-    display: flex;
-    flex-flow: row nowrap;
-    height: 50px;
-    align-items: center;
-    box-sizing: border-box;
-    padding: 10px 30px;
-    background-color: #eeeeee;
-
-    a {
-      font-size: 22px;
-      text-decoration: none;
-      margin-right: 50px;
-      color: #666666;
-
-      &:hover {
-        color: coral;
-      }
-    }
-
-    .active {
-      color: dodgerblue;
-    }
-  }
 
   .content {
     position: absolute;
-    top: 50px;
+    top: 0;
     bottom: 50px;
     left: 0;
     right: 0;
+    //background-color: pink;
   }
 
   .footer {
@@ -77,7 +49,7 @@
     flex-flow: column nowrap;
     justify-content: center;
     align-items: center;
-    background-color: #eeeeee;
+    background-color: #F4F5F5;
 
     .top {
       font-size: 16px;
