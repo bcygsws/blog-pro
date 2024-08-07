@@ -25,7 +25,7 @@ import {getArtAPI, IList, IPage} from "@/apis/article";
 import {getCatAPI, ICategory} from "@/apis/category";
 import {useRouter} from "vue-router";
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
-import HeaderItem from "@/components/header/HeaderItem.vue";
+import HeaderItem from "@/components/item/HeaderItem.vue";
 
 const router = useRouter();
 const {message} = useDiscreteAPI();
@@ -111,8 +111,8 @@ onMounted(() => {
  * */
 watchEffect(() => {
   if (total.value && !artList.value?.length) {
+    // 只讲limit分页时的offset值，归零；让关键字查询，从返回的数据表中第一条开始
     pageInfo.value.page = 1;
-    pageInfo.value.categoryId = 0;
     getArtList(pageInfo.value);
   }
 });

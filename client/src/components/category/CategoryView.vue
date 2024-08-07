@@ -23,11 +23,12 @@ import FrontItem from "@/components/item/FrontItem.vue";
 import {onMounted, ref, watch, watchEffect} from "vue";
 import {getArtAPI, IList, IPage} from "@/apis/article";
 import {getCatAPI, ICategory} from "@/apis/category";
-import {useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
-import HeaderItem from "@/components/header/HeaderItem.vue";
+import HeaderItem from "@/components/item/HeaderItem.vue";
 
 const router = useRouter();
+const route = useRoute();
 const {message} = useDiscreteAPI();
 
 interface ILabel {
@@ -41,8 +42,8 @@ const catList = ref<ICategory[]>([]);
 let options: ILabel[] = [];
 
 // 定义变量存储路由参数
-const routeArg = ref<ICategory>({id: 0, name: ""});
-
+// 为route.params.id插入类型断言，消除警告提示；两种方式：1. <string>route.params.id 2.route.params.id as string
+const routeArg = ref<ICategory>({id: parseInt(route.params.id as string), name: ""});
 // 获取分类id
 const getCatList = async () => {
   const res = await getCatAPI();
@@ -62,9 +63,9 @@ const getCatList = async () => {
 onMounted(() => {
   getCatList();
 });
-
+// 分类id,从路由参数中拿到值，保持页面刷新时，还是请求该分类下的文章列表
 const pageInfo = ref<IPage>({
-  categoryId: 0,
+  categoryId: parseInt(<string>route.params.id),
   page: 1,
   pageSize: 4,
   keywords: ''
@@ -106,8 +107,8 @@ onMounted(() => {
  * */
 watchEffect(() => {
   if (total.value && !artList.value?.length) {
+    // limit 的offset值，归0，从查询到的数据表，第一条开始检索
     pageInfo.value.page = 1;
-    pageInfo.value.categoryId = 0;
     getArtList(pageInfo.value);
   }
 });
@@ -152,8 +153,9 @@ const valueChanged = (val: string) => {
   catList.value.some((item: ICategory) => {
     if (item.name === val) {
       routeArg.value.id = item.id;
-      pageInfo.value.categoryId = item.id;
       routeArg.value.name = item.name;
+      // 分类切换时，categoryId的变化，驱动重新请求数据
+      pageInfo.value.categoryId = item.id;
       return true;
     }
   });

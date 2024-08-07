@@ -7,10 +7,10 @@
   <div class="header">
     <router-link to="/main" active-class="active"><span class="icon-home"><span>首页</span></span></router-link>
     <router-link
-        :to="'/category/'+routeArg.id+'?name='+routeArg.name"
+        :to="{path:'/category/'+routeArg.id,query:{name:routeArg.name}}"
         active-class="active">
       <n-popselect
-          v-model:value="route.query.name"
+          v-model="route.query.name"
           :options="options"
           trigger="click"
           @update:value="valueChanged"
@@ -43,6 +43,7 @@ const props = defineProps({
   },
 });
 console.log(props.options);
+console.log("mytest", props.routeArg.id);
 /**
  * @刷新页面，value_selected值恢复为0
  *

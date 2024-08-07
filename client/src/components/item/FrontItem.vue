@@ -75,7 +75,7 @@ const props = defineProps({
   }
 });
 
-console.log(props.pageInfo);
+console.log("mytest2",props.pageInfo);
 
 </script>
 
@@ -99,6 +99,10 @@ console.log(props.pageInfo);
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+
+    .list {
+      cursor: pointer;
+    }
 
 
   }
