@@ -232,7 +232,7 @@ exports.getBlog = async (req, res) => {
 	let sql = "select `id`,`category_id`,`title`,SUBSTR(`content`, 1, 80) as content,`create_time` from `blog` " + join_sql + " order by `create_time` desc limit ? offset ?";
 	// blog列表的数据总数量，也需要返回前端
 	let countSQL = 'select count(*) as count from `blog`' + join_sql;
-	const p1 =  Query(countSQL, data);// 只是获取满足条件的数据总数，与分页的两个参数无关，不需要concat
+	const p1 = Query(countSQL, data);// 只是获取满足条件的数据总数，与分页的两个参数无关，不需要concat
 	// array.concat()方法返回一个新数组，但不会更改原数组
 	//const p2 = Query(sql, data.concat([(page - 1) * pageSize, pageSize]));// 需要concat分页的两个参数?,? 第一个参数：当前数据的编号数（第一条数据，编号是0）；第二个参数：每页的容量
 	const p2 = Query(sql, data.concat([pageSize, (page - 1) * pageSize]));// 需要concat分页的两个参数?,? 第一个参数：当前数据的编号数（第一条数据，编号是0）；第二个参数：每页的容量
@@ -375,14 +375,23 @@ exports.uploadImage = async (req, res) => {
  * */
 exports.getArtById = async (req, res) => {
 	const {id} = req.params;
-	const sql = "select * from `blog` where `id`=?";
-	const rows = await Query(sql, [id]);
-	// console.log(rows);
+	//const sql = "select blog.*,category.name from `blog` join `category` on blog.category_id=category.id where blog.id=?";
+	//const sql = "select JSON_OBJECT('id',blog.id,'title',blog.title,'content',blog.content,'create_time',blog.create_time,'name',category.name,'comment_list',JSON_ARRAYAGG(JSON_OBJECT('art_id',my_list.art_id,'img',my_list.img,'content',my_list.content,'com_time',my_list.com_time,'username',my_list.username,'fav',my_list.fav))) as article FROM blog join category on category.id=blog.category_id  join my_list on blog.id=my_list.art_id where blog.id=? GROUP BY my_list.art_id ASC";
+	//const sql = "select JSON_OBJECT('id',blog.id,'title',blog.title,'content',blog.content,'create_time',blog.create_time,'name',category.name,IFNULL('comment_list','[]'),(select JSON_ARRAYAGG(JSON_OBJECT('art_id',art_id,'img',img,'content',content,'com_time',com_time,'username',username,'fav',fav)) from my_list where art_id=? )) as article FROM blog join category on category.id=blog.category_id where blog.id=?";
+	const sql = "select JSON_OBJECT('id',blog.id,'category_id',blog.category_id,'title',blog.title,'content',blog.content,'create_time',blog.create_time,'name',category.name,'comment_list',coalesce((select JSON_ARRAYAGG(JSON_OBJECT('id',id,'art_id',art_id,'img',img,'content',content,'com_time',com_time,'username',username,'fav',fav))  from my_list where art_id=?),'[]')) AS article FROM blog join category on category.id=blog.category_id where blog.id=?";
+	const rows = await Query(sql, [id, id]);
+	//console.log(rows);
+	console.log(rows[0]);
+	//console.log("test", JSON.parse(rows[0]['article']));
+	const art_data = JSON.parse(rows[0]['article']);
+	// JSON.parse()方法没有将嵌套的属性，comment_list上的json字符串对象化，单独处理
+	art_data['comment_list'] = JSON.parse(art_data['comment_list']);
+	console.log(art_data);
 	if (rows.length > 0) {
 		res.send({
 			code: 200,
 			message: '当前记录回显成功',
-			data: rows[0]
+			data: art_data
 		});
 	} else {
 		res.send({
@@ -420,7 +429,14 @@ exports.submitArt = async (req, res) => {
 	}
 }
 
-
+/**
+ *
+ *
+ *
+ * */
+exports.submitComment = async (req, res) => {
+	const {artId, content, like} = req.body;
+}
 
 
 

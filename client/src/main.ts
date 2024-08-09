@@ -1,7 +1,7 @@
 import {createApp} from 'vue'
 import './style.scss'
 import App from '@/App.vue';
-import router from "@/router/index.ts";
+import router from "@/router/index";
 import naive from "naive-ui"
 import {createPinia} from "pinia";
 

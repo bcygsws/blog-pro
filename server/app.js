@@ -50,9 +50,9 @@ app.all("*", (req, res, next) => {
 		next();
 	}
 });
-// expJWT(密钥对象，加密算法对象).unless({path:[排除路由项]})
+// expJWT(密钥对象，加密算法对象).unless({path:[白名单，无需token验证的那些路由]})
 app.use(
-	expJWT({secret: SECRET_KEY, algorithms: ['HS256']}).unless({path: ['/login']})
+	expJWT({secret: SECRET_KEY, algorithms: ['HS256']}).unless({path: ['/login', /^\/api\/+/]})
 );
 // 4.错误处理中间件
 app.use((err, req, res, next) => {

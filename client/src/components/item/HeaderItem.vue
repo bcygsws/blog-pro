@@ -24,7 +24,6 @@
 <script lang="ts" setup>
 import {ILabel} from "@/apis/shared";
 import {useRoute} from "vue-router";
-import {watchEffect} from "vue";
 
 const route = useRoute();
 
@@ -42,19 +41,11 @@ const props = defineProps({
     required: true
   },
 });
-console.log(props.options);
+// console.log(props.options);
 console.log("mytest", props.routeArg.id);
-/**
- * @刷新页面，value_selected值恢复为0
- *
- * */
-watchEffect(() => {
-  const str = route;
-  const str1 = route.path;
-  console.log(str);
-  console.log(str1);
-})
-
+// onMounted(() => {
+//   console.log("testCat",props.options);
+// })
 </script>
 
 <style lang="scss" scoped>

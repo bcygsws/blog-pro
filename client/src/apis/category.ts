@@ -18,6 +18,14 @@ function getCatAPI() {
         // method:'GET' // 请求方式为get时，可以省略
     });
 }
+// 前端部分，获取分类列表；无需token验证
+function _getCatAPI() {
+    return http.request<ResType<ICategory[]>>({
+        url: '/api/manage_cat',
+        // method:'GET' // 请求方式为get时，可以省略
+    });
+}
+
 
 // 2.修改分类
 interface IBody {
@@ -52,6 +60,7 @@ function delCatAPI(id: number) {
 
 export {
     getCatAPI,
+    _getCatAPI,
     changeCatAPI,
     addCatAPI,
     delCatAPI

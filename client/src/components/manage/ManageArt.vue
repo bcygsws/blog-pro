@@ -199,7 +199,7 @@ const delHandler = async (id: number) => {
  * */
 const handleAddValidate = (e: MouseEvent) => {
   e.preventDefault();
-  console.log(myRef.value);
+  // console.log(myRef.value);
   console.log(myRef.value.sonRef);
   // console.log(myRef.value.sonRef);
   myRef.value.sonRef.validate(async (errors) => {

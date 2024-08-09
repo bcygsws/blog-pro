@@ -53,7 +53,7 @@ function Query(sql, data) {
 				reject(err);
 			} else {
 				console.log(rows[0]);
-				// 将err和rows组织成一个对象{err,rows},使用resolve()返回
+				// 将rows对象,使用resolve()返回
 				resolve(rows);
 
 			}

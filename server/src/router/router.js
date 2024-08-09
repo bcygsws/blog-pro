@@ -8,7 +8,7 @@ const router = express.Router();
 const {v4: uuidv4} = require('uuid');
 const {
 	loginService, getCat, deleteCatById, putCatById, addCat, getBlog, deleteArtById, addArt, uploadImage, getArtById,
-	submitArt
+	submitArt, submitComment
 } = require("../service");
 const {Query} = require('../mysql/mysql');
 // 获取expJWT方法
@@ -21,6 +21,8 @@ const authenticateJwt = expJWT({secret: SECRET_KEY, algorithms: ['HS256']});
 router.post('/login', loginService);
 // 2.分类列表的获取
 router.get('/manage_cat', authenticateJwt, getCat);
+// 前端分类列表的获取
+router.get('/api/manage_cat', getCat);
 // 3.根据id,删除分类列表的一条记录
 router.delete('/manage_cat/:id', authenticateJwt, deleteCatById);
 // 4.根据id,修改分类列表
@@ -28,8 +30,10 @@ router.delete('/manage_cat/:id', authenticateJwt, deleteCatById);
 router.put("/manage_cat/:id", authenticateJwt, putCatById);
 // 5.分类列表的添加
 router.post('/manage_cat', authenticateJwt, addCat);
-// 6.博客文章列表获取路由
-router.get('/manage_art', authenticateJwt, getBlog)
+// 6.博客文章列表获取
+router.get('/manage_art', authenticateJwt, getBlog);
+//前端文章列表获取
+router.get('/api/manage_art', getBlog);
 // 7.博客文章列表删除
 router.delete('/manage_art/:id', authenticateJwt, deleteArtById);
 // 8.博客文章列表的添加
@@ -37,9 +41,13 @@ router.post('/manage_art', authenticateJwt, addArt);
 // 9.本地图片上传接口
 router.post('/upload/rich_editor_upload', authenticateJwt, uploadImage);
 // 10.博客修改数据回显
-router.get('/manage_art/:id', authenticateJwt, getArtById)
+router.get('/manage_art/:id', authenticateJwt, getArtById);
+//前端根据id请求详情页
+router.get('/api/manage_art/:id', getArtById);
 // 11.博客修改后提交
 router.put('/manage_art', authenticateJwt, submitArt);
+// 12.评论列表的提交
+router.post('/comment',submitComment );
 
 module.exports = router;
 

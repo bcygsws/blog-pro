@@ -21,8 +21,8 @@
 
 import FrontItem from "@/components/item/FrontItem.vue";
 import {onMounted, ref, watch, watchEffect} from "vue";
-import {getArtAPI, IList, IPage} from "@/apis/article";
-import {getCatAPI, ICategory} from "@/apis/category";
+import {_getArtAPI, IList, IPage} from "@/apis/article";
+import {_getCatAPI, ICategory} from "@/apis/category";
 import {useRoute, useRouter} from "vue-router";
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
 import HeaderItem from "@/components/item/HeaderItem.vue";
@@ -46,7 +46,7 @@ let options: ILabel[] = [];
 const routeArg = ref<ICategory>({id: parseInt(route.params.id as string), name: ""});
 // 获取分类id
 const getCatList = async () => {
-  const res = await getCatAPI();
+  const res = await _getCatAPI();
   console.log(res);
   if (res.data.code === 200) {
     catList.value = res.data.data!;
@@ -60,9 +60,6 @@ const getCatList = async () => {
     message.error(res.data.message);
   }
 }
-onMounted(() => {
-  getCatList();
-});
 // 分类id,从路由参数中拿到值，保持页面刷新时，还是请求该分类下的文章列表
 const pageInfo = ref<IPage>({
   categoryId: parseInt(<string>route.params.id),
@@ -81,7 +78,7 @@ const artList = ref<IList[]>([]);
  *
  * */
 const getArtList = async (val: IPage) => {
-  const res = await getArtAPI(val);
+  const res = await _getArtAPI(val);
   console.log(res.data);
   if (res.data.code === 200) {
     const {count, list} = res.data.data;
@@ -93,6 +90,7 @@ const getArtList = async (val: IPage) => {
 
 }
 onMounted(() => {
+  getCatList();
   getArtList(pageInfo.value);
 });
 /**

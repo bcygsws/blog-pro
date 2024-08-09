@@ -21,6 +21,7 @@
             header-style="font-size:14px"
             content-style="font-size:16px"
             footer-style="font-size:14px"
+            @click="navToDetail(item.id)"
         >
           {{ item.content }}
           <template #footer>
@@ -47,8 +48,10 @@
 <script lang="ts" setup>
 import {timeFormat} from "@/utils/timeFormat";
 import {IList} from "@/apis/article";
+import {useRouter} from "vue-router";
 
-const props = defineProps({
+const router = useRouter();
+defineProps({
   pageInfo: {
     type: Object,
     required: true
@@ -75,7 +78,17 @@ const props = defineProps({
   }
 });
 
-console.log("mytest2",props.pageInfo);
+// console.log("mytest2", props.pageInfo);
+/**
+ * @name:navToDetail
+ * @description:文章列表 点击后，导航至详情页
+ *
+ *
+ * */
+const navToDetail = (id: number) => {
+  // console.log(typeof id);
+  router.push(`/manage_art/${id}`);
+}
 
 </script>
 

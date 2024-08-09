@@ -15,14 +15,15 @@
       :total="total"
       :pageChange="pageChange"
       :pageSizeChange="pageSizeChange"
-      :handleSearch="handleSearch"/>
+      :handleSearch="handleSearch"
+  />
 
 </template>
 <script lang="ts" setup>
 import FrontItem from "@/components/item/FrontItem.vue";
 import {onMounted, ref, watchEffect} from "vue";
-import {getArtAPI, IList, IPage} from "@/apis/article";
-import {getCatAPI, ICategory} from "@/apis/category";
+import {_getArtAPI, IList, IPage} from "@/apis/article";
+import {_getCatAPI, ICategory} from "@/apis/category";
 import {useRouter} from "vue-router";
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
 import HeaderItem from "@/components/item/HeaderItem.vue";
@@ -50,7 +51,7 @@ let options: ILabel[] = [];
 const routeArg = ref<ICategory>({id: 0, name: ""});
 // 获取分类id
 const getCatList = async () => {
-  const res = await getCatAPI();
+  const res = await _getCatAPI();
   console.log(res);
   if (res.data.code === 200) {
     catList.value = res.data.data!;
@@ -64,9 +65,6 @@ const getCatList = async () => {
     message.error(res.data.message);
   }
 }
-onMounted(() => {
-  getCatList();
-});
 
 const pageInfo = ref<IPage>({
   categoryId: 0,
@@ -85,7 +83,7 @@ const artList = ref<IList[]>([]);
  *
  * */
 const getArtList = async (val: IPage) => {
-  const res = await getArtAPI(val);
+  const res = await _getArtAPI(val);
   console.log(res.data);
   if (res.data.code === 200) {
     const {count, list} = res.data.data;
@@ -97,6 +95,7 @@ const getArtList = async (val: IPage) => {
 
 }
 onMounted(() => {
+  getCatList();
   getArtList(pageInfo.value);
 });
 /**
@@ -151,11 +150,12 @@ const valueChanged = (val: string) => {
       return true;
     }
   });
-  console.log(catId.value);
   router.push({path: `/category/${routeArg.value.id}`, query: {name: `${routeArg.value.name}`}});
 
 
 }
+
+
 </script>
 
 <style lang="scss" scoped>

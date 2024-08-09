@@ -39,6 +39,11 @@ const routes = [
                         component: () => import("@/components/manage/ManageCat.vue")
                     }
                 ]
+            },
+            {
+                path: '/manage_art/:id',
+                component: () => import("@/components/detail/Detail.vue")
+
             }
 
         ]
