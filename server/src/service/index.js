@@ -430,14 +430,61 @@ exports.submitArt = async (req, res) => {
 }
 
 /**
- *
- *
+ * @向详情页中，添加一条评论
+ * 请求地址：http://localhost:8081/comment
  *
  * */
 exports.submitComment = async (req, res) => {
-	const {artId, content, like} = req.body;
-}
+	const {artId, content} = req.body;
+	const sql = "insert into `my_list`(`id`,`art_id`,`img`,`content`,`com_time`,`username`,`fav`) values(?,?,?,?,?,?,?)";
+	const data = {
+		id: genid.NextId(),
+		art_id: artId,
+		img: 'https://s1.imagehub.cc/images/2024/06/10/981a7aa59ff4268c544ed5c77b70700c.th.jpeg',
+		content: content,
+		com_time: Date.now(),
+		username: genid.NextId().toString(),
+		fav: 0
 
+	}
+	// 给content起个别名，以避免和req.body中content解构重名
+	const {id, art_id, img, content: _content, com_time, username, fav} = data;
+	const rows = await Query(sql, [id, art_id, img, _content, com_time, username, fav]);
+	console.log(rows);
+	if (rows.affectedRows) {
+		res.send({
+			code: 200,
+			message: "你成功添加了一条评论！"
+		});
+	} else {
+		res.send({
+			code: 500,
+			message: "添加评论失败了"
+		});
+	}
+}
+/**
+ * @name:
+ * @description:根据列表id,修改点赞数
+ * 访问地址：http://localhost:8081/comment/1
+ *
+ * */
+exports.changeComment = async (req, res) => {
+	const {id, fav} = req.body;
+	const sql = "update `my_list` set `fav`=? where `id`=?";
+	const rows = await Query(sql, [fav, id]);
+	if (rows.affectedRows) {
+		res.send({
+			code: 200,
+			message: "点赞数量修改成功"
+		});
+	} else {
+		res.send({
+			code: 500,
+			message: "点赞数修改失败"
+		})
+	}
+}
 
 
 

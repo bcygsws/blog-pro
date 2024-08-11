@@ -4,80 +4,82 @@
 *@date: 2024/8/7 23:43
 -->
 <template>
-  <n-card
-      :title="'标题：'+detData.title"
-      :segmented="{
+  <div class="detail-container">
+    <n-card
+        :title="'标题：'+detData.title"
+        :segmented="{
            content: true,
             footer: 'soft',
           }"
-      header-style="font-size: 22px;font-weight: 700"
-      footer-style="font-size: 16px;padding:10px 0"
-  >
-    <template #header-extra>
-      <n-button type="info" size="medium" @click="backHandler">返回</n-button>
-    </template>
-    <div class="content" v-html="detData.content"></div>
-    <template #footer>
-      <div class="detail-footer">
-        <!--创建时间;bug:date-fns包可以传Date对象、时间戳number和字符串时间，使用||操作
-        处理detData['create_time']还没有取到值时的错误;已经在工具文件timeFormat.ts中统一处理-->
-        <span>创建时间：{{ timeFormat(detData['create_time']) }}</span>
-        <!--所属分类-->
-        <span>所属分类：{{ detData.name }}</span>
-      </div>
-    </template>
-  </n-card>
-  <div class="comment">
-    <div class="header">
-      <!--切换区-->
-      <div class="nav">
-        <span>评论{{ total }}</span>
-        <div class="switch">
-          <a :class="[status?'active':'']" @click="selectedHot">最热</a>
-          <a :class="[!status?'active':'']" @click="selectedNew">最新</a>
+        header-style="font-size: 22px;font-weight: 700"
+        footer-style="font-size: 16px;padding:10px 0"
+    >
+      <template #header-extra>
+        <n-button type="info" size="medium" @click="backHandler">返回</n-button>
+      </template>
+      <div class="content" v-html="detData.content"></div>
+      <template #footer>
+        <div class="detail-footer">
+          <!--创建时间;bug:date-fns包可以传Date对象、时间戳number和字符串时间，使用||操作
+          处理detData['create_time']还没有取到值时的错误;已经在工具文件timeFormat.ts中统一处理-->
+          <span>创建时间：{{ timeFormat(detData['create_time']) }}</span>
+          <!--所属分类-->
+          <span>所属分类：{{ detData.name }}</span>
         </div>
-      </div>
-      <!--评论区-->
-      <div class="comment">
-        <div class="left">
-          <img src="https://s1.imagehub.cc/images/2023/07/13/img19.th.jpeg" alt="" width="60" height="60"/>
-        </div>
-        <div class="right">
-          <n-input
-              type="textarea"
-              placeholder="请输入评论内容……"
-              maxlength="140"
-              @blur="handleBlur"
-              @focus="handleFocus"
-              @change="handleChange"
-              @input="handleInput"
-          />
-          <div class="btn">
-            <n-button size="small" type="success" v-show="flag">评论</n-button>
+      </template>
+    </n-card>
+    <div class="comment">
+      <div class="header">
+        <!--切换区-->
+        <div class="nav">
+          <span>评论{{ total }}</span>
+          <div class="switch">
+            <a :class="[status?'active':'']" @click="selectedHot">最热</a>
+            <a :class="[!status?'active':'']" @click="selectedNew">最新</a>
           </div>
         </div>
+        <!--评论区-->
+        <div class="comment">
+          <div class="left">
+            <img src="https://s1.imagehub.cc/images/2023/07/13/img19.th.jpeg" alt="" width="60" height="60"/>
+          </div>
+          <div class="right">
+            <n-input
+                type="textarea"
+                placeholder="请输入评论内容……"
+                v-model:value="comment.content"
+                maxlength="140"
+                @blur="handleBlur"
+                @focus="handleFocus"
+                @input="handleInput"
+            />
+            <div class="btn">
+              <n-button size="small" type="success" v-show="flag" @click="handleSubmit">评论</n-button>
+            </div>
+          </div>
 
-      </div>
-
-    </div>
-    <!--列表区-->
-    <div class="list" v-for="item in resArray" :key="item.id">
-      <div class="figure">
-        <!--只指定图片的 width和height其中一个，图片会等比例缩放；我们希望宽和高相等-->
-        <img :src="item.img" alt="" width="60" height="60"/>
-      </div>
-      <div class="content">
-        <span>{{ item.username }}</span>
-        <div>{{ item.content }}</div>
-        <div class="time">
-          <div class="date">{{ timeFormat(item.com_time) }}</div>
-          <div class="like">
-            <Icon size="16">
-              <ThumbUp/>
-            </Icon>
-            <span class="count">{{ item.fav }}</span></div>
         </div>
-        <n-divider/>
+
+      </div>
+      <!--列表区-->
+      <div class="list" v-for="item in resArray" :key="item.id">
+        <div class="figure">
+          <!--只指定图片的 width和height其中一个，图片会等比例缩放；我们希望宽和高相等-->
+          <img :src="item.img" alt="评论" width="60" height="60"/>
+        </div>
+        <div class="content">
+          <span>{{ item.username }}</span>
+          <div>{{ item.content }}</div>
+          <div class="time">
+            <div class="date">{{ timeFormat(item.com_time) }}</div>
+            <div class="like">
+              <Icon size="16">
+                <ThumbUp/>
+              </Icon>
+              <span class="count">{{ item.fav }}</span></div>
+          </div>
+          <n-divider/>
+        </div>
       </div>
     </div>
   </div>
@@ -85,8 +87,8 @@
 
 </template>
 <script lang="ts" setup>
-import {computed, onMounted, ref} from "vue";
-import {_getArtByIdAPI, IComment, IList} from "@/apis/article";
+import {computed, onMounted, reactive, ref} from "vue";
+import {_getArtByIdAPI, IComment, ICommentList, IList, submitCommentAPI} from "@/apis/article";
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
 import {useRoute, useRouter} from "vue-router";
 import {timeFormat} from "@/utils/timeFormat";
@@ -112,6 +114,14 @@ const flag = ref(false)
 const status = ref(true);
 // 定义变量，存储获取到的评论列表
 const comArray = ref<IComment[]>([]);
+// 定义变量，comment 存储textarea文本和提交的fav值
+const comment = reactive<ICommentList>({
+  id: 0,// 当前评论列表的id
+  artId: parseInt(<string>route.params.id),// 当前所在详情页的分类id
+  content: "",
+  fav: 0,
+});
+
 const getArtDetail = async () => {
   const res = await _getArtByIdAPI(parseInt(<string>route.params.id));
   if (res.data.code === 200) {
@@ -161,14 +171,22 @@ const backHandler = () => {
  *
  * */
 const handleBlur = () => {
-  flag.value = false;
+  // flag.value = false;
 }
 const handleFocus = () => {
   flag.value = true;
 }
-const handleChange = () => {
-}
-const handleInput = () => {
+/**
+ * @name:handleInput
+ * @description:文本域的输入事件
+ * 控制输入的字符数，在140个以内；超出限制，截取
+ *
+ * */
+const handleInput = (val: string) => {
+  if (val.length > 139) {
+    message.error('输入超过了140个字符~');
+  }
+
 }
 /**
  * @name:
@@ -181,10 +199,37 @@ const selectedHot = () => {
 const selectedNew = () => {
   status.value = false;
 }
-
+/**
+ * @name:handleSubmit
+ * @description:评论 按钮"提交"，事件处理函数
+ *
+ * */
+const handleSubmit = async () => {
+  console.log(comment);
+  // 1.将评论内容，提交至服务端
+  const res = await submitCommentAPI({artId: comment.artId, content: comment.content});
+  console.log(res.data);
+  if (res.data.code === 200) {
+    // 1.添加成功提示
+    message.success(res.data.message);
+    // 2.提交评论后，隐藏【评论】按钮
+    flag.value = false;
+    // 3.清空文本域textarea,方便下一次输入
+    comment.content = "";
+    // 4.重新请求详情和评论列表
+    await getArtDetail();
+  } else {
+    message.success(res.data.message);
+  }
+}
 </script>
 
 <style lang="scss" scoped>
+.detail-container {
+  width: 1000px;
+  margin: 0 auto;
+}
+
 .n-card {
   .detail-footer {
     display: flex;

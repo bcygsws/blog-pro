@@ -102,6 +102,20 @@ const submitModifiedAPI = (val: IModel) => {
         data: val
     })
 }
+export type ICommentList = {
+    id?: number;
+    content: string;
+    artId: number;
+    fav?: number;
+};
+// 6.post方法，comment列表添加新纪录
+const submitCommentAPI = (val: ICommentList) => {
+    return http.request({
+        url: '/api/comment',
+        method: 'POST',
+        data: val
+    })
+}
 export {
     getArtAPI,
     _getArtAPI,
@@ -109,5 +123,6 @@ export {
     addArtAPI,
     getArtByIdAPI,
     _getArtByIdAPI,
-    submitModifiedAPI
+    submitModifiedAPI,
+    submitCommentAPI
 }
