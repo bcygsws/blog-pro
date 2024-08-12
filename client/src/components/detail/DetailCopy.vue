@@ -62,33 +62,25 @@
 
       </div>
       <!--列表区-->
-      <n-infinite-scroll style="height: 360px" :distance="10" @load="handleLoad">
-        <div class="list" v-for="item in resArray" :key="item.id">
-          <div class="figure">
-            <!--只指定图片的 width和height其中一个，图片会等比例缩放；我们希望宽和高相等-->
-            <img :src="item.img" alt="评论" width="60" height="60"/>
+      <div class="list" v-for="item in resArray" :key="item.id">
+        <div class="figure">
+          <!--只指定图片的 width和height其中一个，图片会等比例缩放；我们希望宽和高相等-->
+          <img :src="item.img" alt="评论" width="60" height="60"/>
+        </div>
+        <div class="content">
+          <span>{{ item.username }}</span>
+          <div>{{ item.content }}</div>
+          <div class="time">
+            <div class="date">{{ timeFormat(item.com_time) }}</div>
+            <div class="like">
+              <Icon size="16">
+                <ThumbUp/>
+              </Icon>
+              <span class="count">{{ item.fav }}</span></div>
           </div>
-          <div class="content">
-            <span>{{ item.username }}</span>
-            <div>{{ item.content }}</div>
-            <div class="time">
-              <div class="date">{{ timeFormat(item.com_time) }}</div>
-              <div class="like">
-                <Icon size="16">
-                  <ThumbUp/>
-                </Icon>
-                <span class="count">{{ item.fav }}</span></div>
-            </div>
-            <n-divider/>
-          </div>
+          <n-divider/>
         </div>
-        <div v-if="loading" class="text">
-          加载中...
-        </div>
-        <div v-if="noMore" class="text">
-          没有更多了 🤪
-        </div>
-      </n-infinite-scroll>
+      </div>
     </div>
   </div>
 
@@ -130,12 +122,6 @@ const comment = reactive<ICommentList>({
   fav: 0,
 });
 
-// loading存储加载状态，true：正在加载；false:加载完成
-const loading = ref(false);
-// 判断条件，是否还有数据
-const noMore = computed(() => {
-
-});
 const getArtDetail = async () => {
   const res = await _getArtByIdAPI(parseInt(<string>route.params.id));
   if (res.data.code === 200) {
@@ -235,14 +221,6 @@ const handleSubmit = async () => {
   } else {
     message.success(res.data.message);
   }
-}
-/**
- * @name:
- * @description:无限滚动的处理
- *
- * */
-const handleLoad = () => {
-
 }
 </script>
 
@@ -418,9 +396,5 @@ const handleLoad = () => {
   }
 }
 
-/*加载中或者加载完成提示 样式*/
-.text {
-  text-align: center;
-}
 
 </style>
