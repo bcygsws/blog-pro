@@ -86,7 +86,7 @@
           加载中...
         </div>
         <div v-if="noMore" class="text">
-          没有更多了 🤪
+          没有更多了~
         </div>
       </n-infinite-scroll>
     </div>
@@ -95,8 +95,9 @@
 
 </template>
 <script lang="ts" setup>
-import {computed, onMounted, reactive, ref} from "vue";
-import {_getArtByIdAPI, IComment, ICommentList, IList, submitCommentAPI} from "@/apis/article";
+import {computed, onMounted, reactive, ref, watch} from "vue";
+import {_getArtByIdAPI, ICommentList, IList, submitCommentAPI} from "@/apis/article";
+import {IComment} from '@/apis/shared';
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
 import {useRoute, useRouter} from "vue-router";
 import {timeFormat} from "@/utils/timeFormat";
@@ -104,9 +105,12 @@ import {ThumbUp} from '@vicons/tabler';
 import _ from 'lodash';
 // 控制icon图标的样式，如：size color和以何种标签渲染的tag等等
 import {Icon} from '@vicons/utils';
+import {getComByIdAPI} from "@/apis/detail";
 
 const {message} = useDiscreteAPI();
 const route = useRoute();
+// 根据路由参数获取,当前详情页的artId,即文章列表中每篇文章的id
+const artId = parseInt(<string>route.params.id);
 const router = useRouter();
 const detData = ref<IList>({
   category_id: 0,
@@ -117,35 +121,73 @@ const detData = ref<IList>({
   title: ""
 });
 // 文本域获取焦点和失去焦点时，控制【评论】按钮的显示和隐藏
-const flag = ref(false)
+const flag = ref(false);
 // 默认选中 【最热】
 const status = ref(true);
 // 定义变量，存储获取到的评论列表
 const comArray = ref<IComment[]>([]);
+// 定义变量，当前存储获取到的评论列表
+const curArray = ref<IComment[]>([{
+  id: 0,
+  art_id: 0,
+  img: '',
+  fav: 0,
+  content: '',
+  com_time: 0,
+  username: ''
+}]);
 // 定义变量，comment 存储textarea文本和提交的fav值
 const comment = reactive<ICommentList>({
   id: 0,// 当前评论列表的id
-  artId: parseInt(<string>route.params.id),// 当前所在详情页的分类id
+  artId: artId,// 当前所在详情页的分类id
   content: "",
   fav: 0,
+  page: 1,// 当前所在页数
+  pageSize: 5// 每页数据容量
 });
 
 // loading存储加载状态，true：正在加载；false:加载完成
 const loading = ref(false);
 // 判断条件，是否还有数据
-const noMore = computed(() => {
 
+const noMore = ref(false);
+// 利用watch初始时，不侦听；那么noMore.value值还是false
+watch(curArray, (val) => {
+  // console.log("t1", noMore.value);
+  // console.log(val);
+  noMore.value = (val.length == 0);
+  console.log("t2", noMore.value);
 });
 const getArtDetail = async () => {
   const res = await _getArtByIdAPI(parseInt(<string>route.params.id));
   if (res.data.code === 200) {
     console.log(res.data);
     detData.value = res.data.data!;
-    comArray.value = detData.value.comment_list!;
     console.log(typeof res.data.data!.create_time);// number
     message.success("详情页数据请求成功");
   } else {
     message.error("详情页数据请求失败");
+  }
+}
+/**
+ * @name:
+ * @description:根据路由id,my_list表中art_id请求数据
+ *
+ *
+ * */
+const initialPage = ref(1);
+const getCommentList = async (val: number) => {
+  const res = await getComByIdAPI({
+    artId: artId,
+    page: val,
+    pageSize: <number>comment.pageSize
+  });
+  console.log(res);
+  if (res.data.code == 200) {
+    message.success(res.data.message);
+    comArray.value = res.data.data!;
+  } else {
+    // message.error(res.data.message);
   }
 }
 /**
@@ -169,6 +211,7 @@ const total = computed(() => {
 })
 onMounted(() => {
   getArtDetail();
+  getCommentList(initialPage.value);
 });
 /**
  * @name:backHandler
@@ -231,9 +274,9 @@ const handleSubmit = async () => {
     // 3.清空文本域textarea,方便下一次输入
     comment.content = "";
     // 4.重新请求详情和评论列表
-    await getArtDetail();
+    await getCommentList(initialPage.value);
   } else {
-    message.success(res.data.message);
+    message.error(res.data.message);
   }
 }
 /**
@@ -241,8 +284,31 @@ const handleSubmit = async () => {
  * @description:无限滚动的处理
  *
  * */
-const handleLoad = () => {
-
+const handleLoad = async () => {
+  if (loading.value || noMore.value) {
+    return;
+  }
+  loading.value = true;
+  initialPage.value++;
+  console.log(initialPage.value);
+  // 做延时处理，便于看到下拉加载效果
+  // await new Promise((resolve)=>{
+  //   setTimeout(()=>{resolve('');},1000)
+  // })
+  const res = await getComByIdAPI({
+    artId: artId,
+    page: initialPage.value,
+    pageSize: <number>comment.pageSize
+  });
+  if (res.data.code === 200) {
+    curArray.value = res.data.data!;
+    console.log("test res", curArray.value);
+    comArray.value = [...comArray.value, ...curArray.value];
+  } else {
+    curArray.value = [];
+    initialPage.value = 1;
+  }
+  loading.value = false;
 }
 </script>
 

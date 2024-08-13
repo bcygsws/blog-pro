@@ -378,14 +378,15 @@ exports.getArtById = async (req, res) => {
 	//const sql = "select blog.*,category.name from `blog` join `category` on blog.category_id=category.id where blog.id=?";
 	//const sql = "select JSON_OBJECT('id',blog.id,'title',blog.title,'content',blog.content,'create_time',blog.create_time,'name',category.name,'comment_list',JSON_ARRAYAGG(JSON_OBJECT('art_id',my_list.art_id,'img',my_list.img,'content',my_list.content,'com_time',my_list.com_time,'username',my_list.username,'fav',my_list.fav))) as article FROM blog join category on category.id=blog.category_id  join my_list on blog.id=my_list.art_id where blog.id=? GROUP BY my_list.art_id ASC";
 	//const sql = "select JSON_OBJECT('id',blog.id,'title',blog.title,'content',blog.content,'create_time',blog.create_time,'name',category.name,IFNULL('comment_list','[]'),(select JSON_ARRAYAGG(JSON_OBJECT('art_id',art_id,'img',img,'content',content,'com_time',com_time,'username',username,'fav',fav)) from my_list where art_id=? )) as article FROM blog join category on category.id=blog.category_id where blog.id=?";
-	const sql = "select JSON_OBJECT('id',blog.id,'category_id',blog.category_id,'title',blog.title,'content',blog.content,'create_time',blog.create_time,'name',category.name,'comment_list',coalesce((select JSON_ARRAYAGG(JSON_OBJECT('id',id,'art_id',art_id,'img',img,'content',content,'com_time',com_time,'username',username,'fav',fav))  from my_list where art_id=?),'[]')) AS article FROM blog join category on category.id=blog.category_id where blog.id=?";
-	const rows = await Query(sql, [id, id]);
+	//const sql = "select JSON_OBJECT('id',blog.id,'category_id',blog.category_id,'title',blog.title,'content',blog.content,'create_time',blog.create_time,'name',category.name,'comment_list',coalesce((select JSON_ARRAYAGG(JSON_OBJECT('id',id,'art_id',art_id,'img',img,'content',content,'com_time',com_time,'username',username,'fav',fav))  from my_list where art_id=?),'[]')) AS article FROM blog join category on category.id=blog.category_id where blog.id=?";
+	const sql = "select JSON_OBJECT('id',blog.id,'category_id',blog.category_id,'title',blog.title,'content',blog.content,'create_time',blog.create_time,'name',category.name) AS article FROM blog join category on category.id=blog.category_id where blog.id=?";
+	const rows = await Query(sql, [id]);
 	//console.log(rows);
 	console.log(rows[0]);
 	//console.log("test", JSON.parse(rows[0]['article']));
 	const art_data = JSON.parse(rows[0]['article']);
 	// JSON.parse()方法没有将嵌套的属性，comment_list上的json字符串对象化，单独处理
-	art_data['comment_list'] = JSON.parse(art_data['comment_list']);
+	//art_data['comment_list'] = JSON.parse(art_data['comment_list']);
 	console.log(art_data);
 	if (rows.length > 0) {
 		res.send({
@@ -428,7 +429,31 @@ exports.submitArt = async (req, res) => {
 		});
 	}
 }
+/**
+ * @name:getComById
+ * @description:根据id请求评论列表
+ *
+ * */
+exports.getComById = async (req, res) => {
+	const artId = req.params.id;
+	const {page, pageSize} = req.query;
+	const sql = "select * from `my_list` where `art_id`=? order by `com_time` desc limit ? offset ?";
+	const rows = await Query(sql, [artId, parseInt(pageSize), (parseInt(page) - 1) * parseInt(pageSize)]);
+	console.log(rows);
+	if (rows.length > 0) {
+		res.send({
+			code: 200,
+			message: '评论列表请求成功',
+			data: rows
+		});
+	} else {
+		res.send({
+			code: 500,
+			message: '评论列表请求失败'
+		});
+	}
 
+}
 /**
  * @向详情页中，添加一条评论
  * 请求地址：http://localhost:8081/comment

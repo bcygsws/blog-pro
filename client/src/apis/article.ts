@@ -1,18 +1,18 @@
-import ResType from './shared';
+import ResType, {IComment} from './shared';
 import http from "@/utils/http";
 import {UnwrapRef} from "vue";
 
-// 详情页中的评论列表
-export type IComment = {
-    id: number;
-    art_id: number;
-    img: string;
-    fav: number;
-    content: string;
-    com_time: number;
-    username: string;
-
-}
+// // 详情页中的评论列表
+// export type IComment = {
+//     id: number;
+//     art_id: number;
+//     img: string;
+//     fav: number;
+//     content: string;
+//     com_time: number;
+//     username: string;
+//
+// }
 // 1.获取文章列表API
 export type IList = {
     id: number;
@@ -107,6 +107,8 @@ export type ICommentList = {
     content: string;
     artId: number;
     fav?: number;
+    page?: number;
+    pageSize?: number;
 };
 // 6.post方法，comment列表添加新纪录
 const submitCommentAPI = (val: ICommentList) => {
@@ -114,7 +116,7 @@ const submitCommentAPI = (val: ICommentList) => {
         url: '/api/comment',
         method: 'POST',
         data: val
-    })
+    });
 }
 export {
     getArtAPI,
