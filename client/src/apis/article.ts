@@ -1,7 +1,6 @@
-import ResType, {IComment} from './shared';
 import http from "@/utils/http";
 import {UnwrapRef} from "vue";
-
+import ResType from "@/apis/shared";
 // // 详情页中的评论列表
 // export type IComment = {
 //     id: number;
@@ -21,7 +20,6 @@ export type IList = {
     content: string;
     create_time: number;
     name?: string;
-    comment_list?: IComment[]
 }
 
 

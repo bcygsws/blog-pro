@@ -15,11 +15,10 @@ type IPageParams = {
 const getComByIdAPI = (val: IPageParams) => {
     const {artId, page, pageSize} = val;
     return http.request<ResType<IComment[]>>({
-        method: "GET",
         url: `/api/comment/${artId}`,
         params: {
-            page: page,
-            pageSize: pageSize
+            page,
+            pageSize
         }
     })
 }

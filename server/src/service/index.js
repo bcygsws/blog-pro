@@ -437,6 +437,7 @@ exports.submitArt = async (req, res) => {
 exports.getComById = async (req, res) => {
 	const artId = req.params.id;
 	const {page, pageSize} = req.query;
+	console.log(page, pageSize);
 	const sql = "select * from `my_list` where `art_id`=? order by `com_time` desc limit ? offset ?";
 	const rows = await Query(sql, [artId, parseInt(pageSize), (parseInt(page) - 1) * parseInt(pageSize)]);
 	console.log(rows);

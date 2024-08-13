@@ -81,7 +81,7 @@ const getArtList = async (val: IPage) => {
   const res = await _getArtAPI(val);
   console.log(res.data);
   if (res.data.code === 200) {
-    const {count, list} = res.data.data;
+    const {count, list} = res.data.data!;
     total.value = count;
     artList.value = list;
 

@@ -158,6 +158,13 @@ watch(curArray, (val) => {
   noMore.value = (val.length == 0);
   console.log("t2", noMore.value);
 });
+/**
+ * @name:
+ * @description:根据路由id,my_list表中art_id请求数据
+ *
+ *
+ * */
+const initialPage = ref(1);
 const getArtDetail = async () => {
   const res = await _getArtByIdAPI(parseInt(<string>route.params.id));
   if (res.data.code === 200) {
@@ -169,18 +176,12 @@ const getArtDetail = async () => {
     message.error("详情页数据请求失败");
   }
 }
-/**
- * @name:
- * @description:根据路由id,my_list表中art_id请求数据
- *
- *
- * */
-const initialPage = ref(1);
+
 const getCommentList = async (val: number) => {
   const res = await getComByIdAPI({
     artId: artId,
     page: val,
-    pageSize: <number>comment.pageSize
+    pageSize: comment.pageSize as number
   });
   console.log(res);
   if (res.data.code == 200) {
@@ -292,9 +293,9 @@ const handleLoad = async () => {
   initialPage.value++;
   console.log(initialPage.value);
   // 做延时处理，便于看到下拉加载效果
-  // await new Promise((resolve)=>{
-  //   setTimeout(()=>{resolve('');},1000)
-  // })
+  await new Promise((resolve)=>{
+    setTimeout(()=>{resolve('');},500)
+  })
   const res = await getComByIdAPI({
     artId: artId,
     page: initialPage.value,
