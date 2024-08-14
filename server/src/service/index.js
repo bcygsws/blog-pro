@@ -97,7 +97,7 @@ exports.getCat = async (req, res) => {
 	// 分类列表查询
 	const sql = "select * from `category`";
 	const rows = await Query(sql, []);
-	console.log("test", rows);
+	//console.log("test", rows);
 	if (rows.length > 0) {
 		// 查询成功
 		res.send({
@@ -122,7 +122,7 @@ exports.deleteCatById = async (req, res) => {
 	console.log(id);
 	const sql = "delete from `category` where `id`=?";
 	const rows = await Query(sql, [id]);
-	console.log(rows);
+	//console.log(rows);
 	if (rows.affectedRows) {
 		res.send({
 			code: 200,
@@ -155,7 +155,7 @@ exports.putCatById = async (req, res) => {
 	console.log(name);
 	const sql = "update `category` set `name`=? where `id`=?";
 	const rows = await Query(sql, [name, id]);
-	console.log(rows);
+	//console.log(rows);
 	if (rows.affectedRows) {
 		res.send({
 			code: 200,
@@ -182,7 +182,7 @@ exports.addCat = async (req, res) => {
 	// 根据雪花切片算法，产生随即id
 	const id = genid.NextId();
 	const rows = await Query(sql, [id, name]);
-	console.log(rows);
+	//console.log(rows);
 	if (rows.affectedRows) {
 		res.send({
 			code: 200,
@@ -416,7 +416,7 @@ exports.submitArt = async (req, res) => {
 	const {id, categoryId, title, content} = req.body;
 	const sql = "update `blog` set `category_id`=?,`title`=?,`content`=?,`create_time`=? where `id`=?";
 	const rows = await Query(sql, [categoryId, title, content, Date.now(), id]);
-	console.log(rows);
+	//console.log(rows);
 	if (rows.affectedRows) {
 		res.send({
 			code: 200,
@@ -440,7 +440,7 @@ exports.getComById = async (req, res) => {
 	console.log(page, pageSize);
 	const sql = "select * from `my_list` where `art_id`=? order by `com_time` desc limit ? offset ?";
 	const rows = await Query(sql, [artId, parseInt(pageSize), (parseInt(page) - 1) * parseInt(pageSize)]);
-	console.log(rows);
+	//console.log(rows);
 	if (rows.length > 0) {
 		res.send({
 			code: 200,
@@ -462,11 +462,19 @@ exports.getComById = async (req, res) => {
  * */
 exports.submitComment = async (req, res) => {
 	const {artId, content} = req.body;
+	// 产生一个随机图像
+	const avatars = [
+		"https://s1.imagehub.cc/images/2023/07/13/img27.th.jpeg",
+		"https://s1.imagehub.cc/images/2023/06/28/img4.th.jpeg",
+		"https://s1.imagehub.cc/images/2023/07/13/img20.th.jpeg",
+		"https://s1.imagehub.cc/images/2023/07/13/img30.th.jpeg"
+	];
+	const img_url = avatars[Math.floor(Math.random() * 4)];
 	const sql = "insert into `my_list`(`id`,`art_id`,`img`,`content`,`com_time`,`username`,`fav`) values(?,?,?,?,?,?,?)";
 	const data = {
 		id: genid.NextId(),
 		art_id: artId,
-		img: 'https://s1.imagehub.cc/images/2024/06/10/981a7aa59ff4268c544ed5c77b70700c.th.jpeg',
+		img: img_url,
 		content: content,
 		com_time: Date.now(),
 		username: genid.NextId().toString(),
@@ -511,7 +519,27 @@ exports.changeComment = async (req, res) => {
 		})
 	}
 }
-
+/**
+ *
+ *
+ * */
+exports.delComment = async (req, res) => {
+	const {id} = req.params;
+	const sql = "delete from `my_list` where `id`=?";
+	const rows = await Query(sql, [id]);
+	console.log(rows);
+	if (rows.affectedRows) {
+		res.send({
+			code: 200,
+			message: "成功删除了一条记录"
+		});
+	} else {
+		res.send({
+			code: 500,
+			message: "删除一条记录失败"
+		});
+	}
+}
 
 
 

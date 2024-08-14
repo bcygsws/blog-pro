@@ -15,7 +15,7 @@
         footer-style="font-size: 16px;padding:10px 0"
     >
       <template #header-extra>
-        <n-button type="info" size="medium" @click="backHandler">返回</n-button>
+        <n-button type="success" size="medium" @click="backHandler">返回</n-button>
       </template>
       <div class="content" v-html="detData.content"></div>
       <template #footer>
@@ -62,7 +62,7 @@
 
       </div>
       <!--列表区-->
-      <n-infinite-scroll style="height: 360px" :distance="10" @load="handleLoad">
+      <n-infinite-scroll style="height: 450px" :distance="10" @load="handleLoad">
         <div class="list" v-for="item in resArray" :key="item.id">
           <div class="figure">
             <!--只指定图片的 width和height其中一个，图片会等比例缩放；我们希望宽和高相等-->
@@ -72,13 +72,18 @@
             <span>{{ item.username }}</span>
             <div>{{ item.content }}</div>
             <div class="time">
-              <div class="date">{{ timeFormat(item.com_time) }}</div>
-              <div class="like">
-                <Icon size="16">
-                  <ThumbUp/>
-                </Icon>
-                <span class="count">{{ item.fav }}</span></div>
+              <div class="date">
+                <span class="show-time">{{ timeFormat(item.com_time) }}</span>
+                <div class="like">
+                  <Icon size="16">
+                    <ThumbUp @click="handleClick(item.id,item.fav)"/>
+                  </Icon>
+                  <span class="count">{{ item.fav }}</span></div>
+              </div>
+              <!--只有用户名为admin,确认是自己的，才可以删除；别人的评论无权删除-->
+              <a class="del" @click="delById(item.id)" v-if="user===item.username">删除</a>
             </div>
+
             <n-divider/>
           </div>
         </div>
@@ -96,7 +101,7 @@
 </template>
 <script lang="ts" setup>
 import {computed, onMounted, reactive, ref, watch} from "vue";
-import {_getArtByIdAPI, ICommentList, IList, submitCommentAPI} from "@/apis/article";
+import {_getArtByIdAPI, IList} from "@/apis/article";
 import {IComment} from '@/apis/shared';
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
 import {useRoute, useRouter} from "vue-router";
@@ -105,7 +110,8 @@ import {ThumbUp} from '@vicons/tabler';
 import _ from 'lodash';
 // 控制icon图标的样式，如：size color和以何种标签渲染的tag等等
 import {Icon} from '@vicons/utils';
-import {getComByIdAPI} from "@/apis/detail";
+import {delComByIdAPI, getComByIdAPI, ICommentList, putComFavAPI, submitCommentAPI} from "@/apis/detail";
+import {getToken} from "@/utils/token";
 
 const {message} = useDiscreteAPI();
 const route = useRoute();
@@ -158,6 +164,8 @@ watch(curArray, (val) => {
   noMore.value = (val.length == 0);
   console.log("t2", noMore.value);
 });
+// 当前用户名
+const user = ref("");
 /**
  * @name:
  * @description:根据路由id,my_list表中art_id请求数据
@@ -177,10 +185,10 @@ const getArtDetail = async () => {
   }
 }
 
-const getCommentList = async (val: number) => {
+const getCommentList = async () => {
   const res = await getComByIdAPI({
     artId: artId,
-    page: val,
+    page: initialPage.value,
     pageSize: comment.pageSize as number
   });
   console.log(res);
@@ -211,8 +219,11 @@ const total = computed(() => {
   return comArray.value.length;
 })
 onMounted(() => {
+  // 获取当前登录用户名
+  getUserInfo();
   getArtDetail();
-  getCommentList(initialPage.value);
+  getCommentList();
+
 });
 /**
  * @name:backHandler
@@ -274,8 +285,10 @@ const handleSubmit = async () => {
     flag.value = false;
     // 3.清空文本域textarea,方便下一次输入
     comment.content = "";
+    // 已经展开滚动到底的页面，在添加新记录后，重新初始化
+    noMore.value = false;
     // 4.重新请求详情和评论列表
-    await getCommentList(initialPage.value);
+    await getCommentList();
   } else {
     message.error(res.data.message);
   }
@@ -286,16 +299,20 @@ const handleSubmit = async () => {
  *
  * */
 const handleLoad = async () => {
+  console.log("我执行了1");
   if (loading.value || noMore.value) {
     return;
   }
+  console.log("我执行了2");
   loading.value = true;
   initialPage.value++;
   console.log(initialPage.value);
   // 做延时处理，便于看到下拉加载效果
-  await new Promise((resolve)=>{
-    setTimeout(()=>{resolve('');},500)
-  })
+  await new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({});
+    }, 500)
+  });
   const res = await getComByIdAPI({
     artId: artId,
     page: initialPage.value,
@@ -310,6 +327,64 @@ const handleLoad = async () => {
     initialPage.value = 1;
   }
   loading.value = false;
+}
+/**
+ * @name:handleClick
+ * @description:点赞后，点赞数+1
+ *
+ * */
+const handleClick = async (id: number, fav: number) => {
+  console.log(id, fav);
+  // 点赞一次，fav在原来值上+1
+  comArray.value.some(item => {
+    if (item.id == id) {
+      item.fav += 1;
+      return true;
+    }
+  });
+  // 提交到数据库
+  const res = await putComFavAPI({id: id, fav: fav + 1});
+  console.log(res.data);
+
+}
+/**
+ * @name:delById
+ * @description:根据id删除，一条评论记录
+ *
+ *
+ * */
+// 定义方法，获取当前用户信息
+const getUserInfo = () => {
+  const token = getToken();
+  user.value = <string>localStorage.getItem('account');
+  return {
+    token,
+    username: user.value
+  }
+}
+const delById = async (id: number) => {
+  const {token, username} = getUserInfo();
+  if (token && username === 'admin') {
+    // 从数组中将元素删除
+    comArray.value.some((item, index) => {
+      if (item.id === id) {
+        comArray.value.splice(index, 1);
+        return true;
+      }
+    });
+    // 将该条从数据库中删除
+    const res = await delComByIdAPI(id);
+    if (res.data.code === 200) {
+      message.success(res.data.message);
+      await getCommentList();
+    } else {
+      message.error(res.data.message);
+    }
+
+
+  } else {
+    message.error("删除当前记录失败");
+  }
 }
 </script>
 
@@ -464,22 +539,41 @@ const handleLoad = async () => {
         display: flex;
         flex-flow: row nowrap;
         align-items: center;
+        justify-content: space-between;
 
         .date {
-          margin-right: 30px;
-          font-size: 14px;
-        }
-
-        .like {
           display: flex;
           flex-flow: row nowrap;
-          align-items: center;
 
-          .count {
-            margin-left: 5px;
+          .show-time {
+            margin-right: 30px;
             font-size: 14px;
+
+          }
+
+          .like {
+            display: flex;
+            flex-flow: row nowrap;
+            align-items: center;
+            cursor: pointer;
+
+            .count {
+              margin-left: 5px;
+              font-size: 14px;
+            }
           }
         }
+
+        a.del {
+          font-size: 14px;
+          cursor: pointer;
+
+          &:hover {
+            color: #2080F0;
+          }
+        }
+
+
       }
     }
   }

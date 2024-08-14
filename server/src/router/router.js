@@ -8,7 +8,7 @@ const router = express.Router();
 const {v4: uuidv4} = require('uuid');
 const {
 	loginService, getCat, deleteCatById, putCatById, addCat, getBlog, deleteArtById, addArt, uploadImage, getArtById,
-	submitArt, submitComment, changeComment, getComById
+	submitArt, submitComment, changeComment, getComById, delComment
 } = require("../service");
 const {Query} = require('../mysql/mysql');
 // 获取expJWT方法
@@ -51,8 +51,9 @@ router.get("/api/comment/:id", getComById);
 // 12.评论列表的提交
 router.post('/api/comment', submitComment);
 // 13.根据评论列表id数，修改点赞数
-router.put('/api/comment/:id', changeComment);
-
+router.put('/api/comment', changeComment);
+//14.根据id删除一条记录
+router.delete('/api/comment/:id', delComment);
 module.exports = router;
 
 
