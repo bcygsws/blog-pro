@@ -456,6 +456,23 @@ exports.getComById = async (req, res) => {
 
 }
 /**
+ * 参数：
+ * 路径参数：artId,必须
+ * 查询参数：timestamp,pageSize
+ * timestamp，可选；不传值使用当前表中按时间排序，最大时间戳值
+ *
+ *
+ *
+ * */
+exports.getComByTimestamp = async (req, res) => {
+	const {artId} = req.params;
+	const {timestamp, pageSize} = req.query;
+	const sql = "select * from (select *, ROW_NUMBER() over (ORDER BY `com_time` DESC ) as rn from my_list where art_id =?) as emp where rn % ? =1";
+	const rows = await Query(sql, [artId, pageSize]);
+	console.log(rows);
+
+}
+/**
  * @向详情页中，添加一条评论
  * 请求地址：http://localhost:8081/comment
  *
@@ -467,9 +484,10 @@ exports.submitComment = async (req, res) => {
 		"https://s1.imagehub.cc/images/2023/07/13/img27.th.jpeg",
 		"https://s1.imagehub.cc/images/2023/06/28/img4.th.jpeg",
 		"https://s1.imagehub.cc/images/2023/07/13/img20.th.jpeg",
+		"https://s1.imagehub.cc/images/2023/07/13/img21.th.jpeg",
 		"https://s1.imagehub.cc/images/2023/07/13/img30.th.jpeg"
 	];
-	const img_url = avatars[Math.floor(Math.random() * 4)];
+	const img_url = avatars[Math.floor(Math.random() * 5)];
 	const sql = "insert into `my_list`(`id`,`art_id`,`img`,`content`,`com_time`,`username`,`fav`) values(?,?,?,?,?,?,?)";
 	const data = {
 		id: genid.NextId(),
@@ -484,7 +502,7 @@ exports.submitComment = async (req, res) => {
 	// 给content起个别名，以避免和req.body中content解构重名
 	const {id, art_id, img, content: _content, com_time, username, fav} = data;
 	const rows = await Query(sql, [id, art_id, img, _content, com_time, username, fav]);
-	console.log(rows);
+	//console.log(rows);
 	if (rows.affectedRows) {
 		res.send({
 			code: 200,

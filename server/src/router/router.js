@@ -8,7 +8,7 @@ const router = express.Router();
 const {v4: uuidv4} = require('uuid');
 const {
 	loginService, getCat, deleteCatById, putCatById, addCat, getBlog, deleteArtById, addArt, uploadImage, getArtById,
-	submitArt, submitComment, changeComment, getComById, delComment
+	submitArt, submitComment, changeComment, getComById, delComment, getComByTimestamp
 } = require("../service");
 const {Query} = require('../mysql/mysql');
 // 获取expJWT方法
@@ -48,6 +48,7 @@ router.get('/api/manage_art/:id', getArtById);
 router.put('/manage_art', authenticateJwt, submitArt);
 // 12.根据id请求评论列表
 router.get("/api/comment/:id", getComById);
+router.get("/api/comment1/:id", getComByTimestamp);
 // 12.评论列表的提交
 router.post('/api/comment', submitComment);
 // 13.根据评论列表id数，修改点赞数
