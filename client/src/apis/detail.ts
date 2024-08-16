@@ -8,6 +8,7 @@ export type ICommentList = {
     fav?: number;
     page?: number;
     pageSize?: number;
+    timestamp?: number;
 };
 // 6.post方法，comment列表添加新纪录
 const submitCommentAPI = (val: ICommentList) => {
@@ -38,6 +39,35 @@ const getComByIdAPI = (val: IPageParams) => {
             pageSize
         }
     })
+}
+/**
+ * @根据返回的时间戳pre_timestamp分页查询
+ * 1.路径参数id:文章列表id,即 my_list表art_id
+ * 2.查询参数
+ * pageSize
+ * timestamp
+ *
+ * */
+type ITimestamp = {
+    pre_timestamp: number;
+    list: IComment[]
+}
+export type ITimeParams = {
+    artId: number;
+    pageSize: number;
+    timestamp: number;
+}
+const getComByTimeAPI = (val: ITimeParams) => {
+    const {artId, pageSize, timestamp} = val;
+    return http.request<ResType<ITimestamp>>({
+        method: 'GET',
+        url: `/api/comment/${artId}`,
+        params: {
+            pageSize,
+            timestamp
+        }
+    })
+
 }
 /**
  * @name:putComFavAPI
@@ -76,5 +106,6 @@ export {
     getComByIdAPI,
     submitCommentAPI,
     putComFavAPI,
-    delComByIdAPI
+    delComByIdAPI,
+    getComByTimeAPI
 }

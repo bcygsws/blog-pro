@@ -47,8 +47,8 @@ router.get('/api/manage_art/:id', getArtById);
 // 11.博客修改后提交
 router.put('/manage_art', authenticateJwt, submitArt);
 // 12.根据id请求评论列表
-router.get("/api/comment/:id", getComById);
-router.get("/api/comment1/:id", getComByTimestamp);
+//router.get("/api/comment/:id", getComById);
+router.get("/api/comment/:id", getComByTimestamp);
 // 12.评论列表的提交
 router.post('/api/comment', submitComment);
 // 13.根据评论列表id数，修改点赞数

@@ -62,7 +62,7 @@
 
       </div>
       <!--列表区-->
-      <n-infinite-scroll style="height: 300px" :distance="10" @load="handleLoad">
+      <n-infinite-scroll style="height: 450px" :distance="10" @load="handleLoad">
         <div class="list" v-for="item in resArray" :key="item.id">
           <div class="figure">
             <!--只指定图片的 width和height其中一个，图片会等比例缩放；我们希望宽和高相等-->
@@ -100,7 +100,7 @@
 
 </template>
 <script lang="ts" setup>
-import {computed, onMounted, reactive, ref} from "vue";
+import {computed, onMounted, reactive, ref, watch} from "vue";
 import {_getArtByIdAPI, IList} from "@/apis/article";
 import {IComment} from '@/apis/shared';
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
@@ -110,13 +110,7 @@ import {ThumbUp} from '@vicons/tabler';
 import _ from 'lodash';
 // 控制icon图标的样式，如：size color和以何种标签渲染的tag等等
 import {Icon} from '@vicons/utils';
-import {
-  delComByIdAPI,
-  getComByTimeAPI,
-  ICommentList,
-  putComFavAPI,
-  submitCommentAPI
-} from "@/apis/detail";
+import {delComByIdAPI, getComByIdAPI, ICommentList, putComFavAPI, submitCommentAPI} from "@/apis/detail";
 import {getToken} from "@/utils/token";
 
 const {message} = useDiscreteAPI();
@@ -139,24 +133,36 @@ const status = ref(true);
 // 定义变量，存储获取到的评论列表
 const comArray = ref<IComment[]>([]);
 // 定义变量，当前存储获取到的评论列表
-const curArray = ref<IComment[]>([]);
+const curArray = ref<IComment[]>([{
+  id: 0,
+  art_id: 0,
+  img: '',
+  fav: 0,
+  content: '',
+  com_time: 0,
+  username: ''
+}]);
 // 定义变量，comment 存储textarea文本和提交的fav值
 const comment = reactive<ICommentList>({
   id: 0,// 当前评论列表的id
   artId: artId,// 当前所在详情页的分类id
   content: "",
   fav: 0,
-  pageSize: 5,// 每页数据容量
-  timestamp: Date.now(),// 时间初始值设置为当前时间
-
+  page: 1,// 当前所在页数
+  pageSize: 5// 每页数据容量
 });
 
 // loading存储加载状态，true：正在加载；false:加载完成
 const loading = ref(false);
 // 判断条件，是否还有数据
 
-let noMore = computed(() => {
-  return comment.timestamp === 0;
+const noMore = ref(false);
+// 利用watch初始时，不侦听；那么noMore.value值还是false
+watch(curArray, (val) => {
+  // console.log("t1", noMore.value);
+  // console.log(val);
+  noMore.value = (val.length == 0);
+  console.log("t2", noMore.value);
 });
 // 当前用户名
 const user = ref("");
@@ -166,12 +172,13 @@ const user = ref("");
  *
  *
  * */
+const initialPage = ref(1);
 const getArtDetail = async () => {
   const res = await _getArtByIdAPI(parseInt(<string>route.params.id));
   if (res.data.code === 200) {
     console.log(res.data);
     detData.value = res.data.data!;
-    // console.log(typeof res.data.data!.create_time);// number
+    console.log(typeof res.data.data!.create_time);// number
     message.success("详情页数据请求成功");
   } else {
     message.error("详情页数据请求失败");
@@ -179,17 +186,15 @@ const getArtDetail = async () => {
 }
 
 const getCommentList = async () => {
-  const res = await getComByTimeAPI({
+  const res = await getComByIdAPI({
     artId: artId,
-    timestamp: Date.now(),
+    page: initialPage.value,
     pageSize: comment.pageSize as number
   });
   console.log(res);
   if (res.data.code == 200) {
     message.success(res.data.message);
-    comArray.value = res.data.data?.list!;
-    comment.timestamp = res.data.data?.pre_timestamp;
-    console.log("test res", comment.timestamp);
+    comArray.value = res.data.data!;
   } else {
     // message.error(res.data.message);
   }
@@ -281,6 +286,7 @@ const handleSubmit = async () => {
     // 3.清空文本域textarea,方便下一次输入
     comment.content = "";
     // 已经展开滚动到底的页面，在添加新记录后，重新初始化
+    noMore.value = false;
     // 4.重新请求详情和评论列表
     await getCommentList();
   } else {
@@ -290,39 +296,35 @@ const handleSubmit = async () => {
 /**
  * @name:
  * @description:无限滚动的处理
- * 1.最后一次取数据时，返回的pre_timestamp为0，作为noMore成为true的条件
- * 表示，数据已经取完了
- *
- *
  *
  * */
 const handleLoad = async () => {
-  console.log("noMore", noMore.value);
+  console.log("我执行了1");
   if (loading.value || noMore.value) {
     return;
   }
   console.log("我执行了2");
   loading.value = true;
+  initialPage.value++;
+  console.log(initialPage.value);
   // 做延时处理，便于看到下拉加载效果
   await new Promise((resolve) => {
     setTimeout(() => {
       resolve({});
-    }, 1000);
+    }, 500)
   });
-  const res = await getComByTimeAPI({
+  const res = await getComByIdAPI({
     artId: artId,
-    timestamp: comment.timestamp as number,
-    pageSize: comment.pageSize as number
+    page: initialPage.value,
+    pageSize: <number>comment.pageSize
   });
   if (res.data.code === 200) {
-    curArray.value = res.data.data?.list!;
-    comment.timestamp = res.data.data?.pre_timestamp;
+    curArray.value = res.data.data!;
     console.log("test res", curArray.value);
-    console.log("test res", comment.timestamp);
-    comArray.value = curArray.value.concat(comArray.value);
-  } else {// 当请求出错时，恢复最初状态
+    comArray.value = [...comArray.value, ...curArray.value];
+  } else {
     curArray.value = [];
-    comment.timestamp = Date.now();
+    initialPage.value = 1;
   }
   loading.value = false;
 }

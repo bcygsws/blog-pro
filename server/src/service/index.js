@@ -434,27 +434,28 @@ exports.submitArt = async (req, res) => {
  * @description:根据id请求评论列表
  *
  * */
-exports.getComById = async (req, res) => {
-	const artId = req.params.id;
-	const {page, pageSize} = req.query;
-	console.log(page, pageSize);
-	const sql = "select * from `my_list` where `art_id`=? order by `com_time` desc limit ? offset ?";
-	const rows = await Query(sql, [artId, parseInt(pageSize), (parseInt(page) - 1) * parseInt(pageSize)]);
-	//console.log(rows);
-	if (rows.length > 0) {
-		res.send({
-			code: 200,
-			message: '评论列表请求成功',
-			data: rows
-		});
-	} else {
-		res.send({
-			code: 500,
-			message: '评论列表请求失败'
-		});
-	}
+//exports.getComById = async (req, res) => {
+//	const artId = req.params.id;
+//	const {page, pageSize} = req.query;
+//	console.log(page, pageSize);
+//	const sql = "select * from `my_list` where `art_id`=? order by `com_time` desc limit ? offset ?";
+//	const rows = await Query(sql, [artId, parseInt(pageSize), (parseInt(page) - 1) * parseInt(pageSize)]);
+//	//console.log(rows);
+//	if (rows.length > 0) {
+//		res.send({
+//			code: 200,
+//			message: '评论列表请求成功',
+//			data: rows
+//		});
+//	} else {
+//		res.send({
+//			code: 500,
+//			message: '评论列表请求失败'
+//		});
+//	}
+//
+//}
 
-}
 /**
  * 参数：
  * 路径参数：artId,必须
@@ -465,11 +466,82 @@ exports.getComById = async (req, res) => {
  *
  * */
 exports.getComByTimestamp = async (req, res) => {
-	const {artId} = req.params;
-	const {timestamp, pageSize} = req.query;
-	const sql = "select * from (select *, ROW_NUMBER() over (ORDER BY `com_time` DESC ) as rn from my_list where art_id =?) as emp where rn % ? =1";
-	const rows = await Query(sql, [artId, pageSize]);
+	// id为路径参数，必传值
+	const artId = req.params.id;
+	let {timestamp, pageSize} = req.query;
+	//console.log("test1", timestamp);
+	// 处理前端忘记为两个查询参数传值的情况
+	timestamp = timestamp ? parseInt(timestamp) : 0;
+	pageSize = pageSize ? pageSize : 5;
+	//console.log("test2", timestamp);
+	const data = {
+		artId: parseInt(artId),
+		size: parseInt(pageSize)
+	}
+	const sql = "select com_time,rn from (select com_time, ROW_NUMBER() over (PARTITION BY art_id ORDER BY com_time DESC) as rn from my_list WHERE art_id=? ) emp  WHERE rn % ? =1";
+	const rows = await Query(sql, [data.artId, data.size]);
 	console.log(rows);
+	if (rows.length > 0) {
+		// 存储分页节点的时间戳值，pageArray值已经按照降序排列好了
+		const pageArray = rows;
+		console.log(pageArray);
+		let timeArray = pageArray.map(item => (item.com_time));
+		console.log(timeArray);
+		// 根据节点时间戳，获取分页数据
+		const SQL = "SELECT * FROM my_list WHERE com_time <=? ORDER BY com_time desc limit ?";
+		//根据传入的时间戳值，设置参数SQL_DATA
+		let SQL_DATA = [];
+		// 并将下次请求节点时间戳值返回前端
+		let pre_timestamp;
+		if (!timeArray.includes(timestamp)) {
+			//console.log(timeArray.includes(timestamp));
+			SQL_DATA = [timeArray[0], data.size];
+			pre_timestamp = timeArray[1];
+			const rows = await Query(SQL, SQL_DATA);
+			if (rows.length > 0) {
+				res.send({
+					code: 200,
+					message: "请求评论列表成功",
+					data: {
+						pre_timestamp: pre_timestamp,
+						list: rows
+					}
+				})
+			} else {
+				res.send({
+					code: 500,
+					message: "评论列表没有记录"
+				});
+			}
+		} else {// 请求参数时间戳在数组中
+			//console.log(timeArray.includes(timestamp));
+			let index = timeArray.indexOf(timestamp);
+			SQL_DATA = [timeArray[index], data.size];
+			if (timeArray.length > index + 1) {
+				pre_timestamp = timeArray[index + 1];
+			} else {
+				pre_timestamp = 0;// 表示这已经是最后一页数据了
+			}
+			console.log("my_test", pre_timestamp);
+			const rows = await Query(SQL, SQL_DATA);
+			res.send({
+				code: 200,
+				message: "请求评论列表成功",
+				data: {
+					pre_timestamp: pre_timestamp,
+					list: rows
+				}
+			})
+
+		}
+
+
+	} else {
+		res.send({
+			code: 500,
+			message: "评论列表没有记录"
+		});
+	}
 
 }
 /**
