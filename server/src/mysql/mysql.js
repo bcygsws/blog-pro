@@ -54,7 +54,7 @@ function Query(sql, data) {
 			} else {
 				console.log(rows[0]);
 				// 将rows对象,使用resolve()返回
-				resolve(rows);
+				resolve({rows});
 
 			}
 

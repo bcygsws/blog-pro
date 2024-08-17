@@ -31,8 +31,8 @@ exports.loginService = async (req, res) => {
 	const {account, password} = req.body;
 	// rows是数组变量
 	const sql = "select * from `admin` where `account`=? and `password`=? ";
-	const rows = await Query(sql, [account, password]);
-	// console.log("testing", rows);// 查询的结果
+	const {rows} = await Query(sql, [account, password]);
+	console.log("testing", rows);// 查询的结果
 	// 1.登录成功判断
 	//
 	// 方案一：简单使用uuid生成了token,安全性低
@@ -96,7 +96,7 @@ exports.loginService = async (req, res) => {
 exports.getCat = async (req, res) => {
 	// 分类列表查询
 	const sql = "select * from `category`";
-	const rows = await Query(sql, []);
+	const {rows} = await Query(sql, []);
 	//console.log("test", rows);
 	if (rows.length > 0) {
 		// 查询成功
@@ -121,7 +121,7 @@ exports.deleteCatById = async (req, res) => {
 	const {id} = req.params;
 	console.log(id);
 	const sql = "delete from `category` where `id`=?";
-	const rows = await Query(sql, [id]);
+	const {rows} = await Query(sql, [id]);
 	//console.log(rows);
 	if (rows.affectedRows) {
 		res.send({
@@ -154,7 +154,7 @@ exports.putCatById = async (req, res) => {
 	console.log(id);
 	console.log(name);
 	const sql = "update `category` set `name`=? where `id`=?";
-	const rows = await Query(sql, [name, id]);
+	const {rows} = await Query(sql, [name, id]);
 	//console.log(rows);
 	if (rows.affectedRows) {
 		res.send({
@@ -181,7 +181,7 @@ exports.addCat = async (req, res) => {
 	const sql = "insert into `category`(`id`,`name`) values(?,?)";
 	// 根据雪花切片算法，产生随即id
 	const id = genid.NextId();
-	const rows = await Query(sql, [id, name]);
+	const {rows} = await Query(sql, [id, name]);
 	//console.log(rows);
 	if (rows.affectedRows) {
 		res.send({
@@ -237,16 +237,20 @@ exports.getBlog = async (req, res) => {
 	//const p2 = Query(sql, data.concat([(page - 1) * pageSize, pageSize]));// 需要concat分页的两个参数?,? 第一个参数：当前数据的编号数（第一条数据，编号是0）；第二个参数：每页的容量
 	const p2 = Query(sql, data.concat([pageSize, (page - 1) * pageSize]));// 需要concat分页的两个参数?,? 第一个参数：当前数据的编号数（第一条数据，编号是0）；第二个参数：每页的容量
 	//
-	const rows = await Promise.all([p1, p2]);
-	//console.log(rows);// [[],[]]
-	// console.log("test", rows[0]);
-	if (rows.length > 0) {
+	let result;
+	result = await Promise.all([p1, p2]);
+	console.log(result);
+	//console.log("test-rows",result);// [{rows:[总数]},{rows:[list列表]}]
+	const {rows: total} = result[0]
+	const {rows: list} = result[1];
+	//console.log("test", rows[0]);
+	if (result[1].rows.length > 0) {
 		res.send({
 			code: 200,
 			message: '文章列表请求成功',
 			data: {
-				count: rows[0][0]['count'],
-				list: rows[1]
+				count: total[0]?.count,
+				list: list
 			}
 		})
 	} else {
@@ -266,7 +270,7 @@ exports.deleteArtById = async (req, res) => {
 	const {id} = req.params;
 	// 根据id,删除当前记录
 	const sql = 'delete from `blog` where `id`=?';
-	const rows = await Query(sql, [id]);
+	const {rows} = await Query(sql, [id]);
 	if (rows.affectedRows) {
 		res.send({
 			code: 200,
@@ -297,7 +301,7 @@ exports.addArt = async (req, res) => {
 		content: content,
 		create_time: (new Date()).getTime()
 	}
-	const rows = await Query(sql, [info.id, info.category_id, info.title, info.content, info.create_time]);
+	const {rows} = await Query(sql, [info.id, info.category_id, info.title, info.content, info.create_time]);
 	// console.log("mytest", rows);
 	// console.log("mytest", rows.affectedRows);
 	if (rows.affectedRows) {
@@ -380,7 +384,7 @@ exports.getArtById = async (req, res) => {
 	//const sql = "select JSON_OBJECT('id',blog.id,'title',blog.title,'content',blog.content,'create_time',blog.create_time,'name',category.name,IFNULL('comment_list','[]'),(select JSON_ARRAYAGG(JSON_OBJECT('art_id',art_id,'img',img,'content',content,'com_time',com_time,'username',username,'fav',fav)) from my_list where art_id=? )) as article FROM blog join category on category.id=blog.category_id where blog.id=?";
 	//const sql = "select JSON_OBJECT('id',blog.id,'category_id',blog.category_id,'title',blog.title,'content',blog.content,'create_time',blog.create_time,'name',category.name,'comment_list',coalesce((select JSON_ARRAYAGG(JSON_OBJECT('id',id,'art_id',art_id,'img',img,'content',content,'com_time',com_time,'username',username,'fav',fav))  from my_list where art_id=?),'[]')) AS article FROM blog join category on category.id=blog.category_id where blog.id=?";
 	const sql = "select JSON_OBJECT('id',blog.id,'category_id',blog.category_id,'title',blog.title,'content',blog.content,'create_time',blog.create_time,'name',category.name) AS article FROM blog join category on category.id=blog.category_id where blog.id=?";
-	const rows = await Query(sql, [id]);
+	const {rows} = await Query(sql, [id]);
 	//console.log(rows);
 	console.log(rows[0]);
 	//console.log("test", JSON.parse(rows[0]['article']));
@@ -415,7 +419,7 @@ exports.getArtById = async (req, res) => {
 exports.submitArt = async (req, res) => {
 	const {id, categoryId, title, content} = req.body;
 	const sql = "update `blog` set `category_id`=?,`title`=?,`content`=?,`create_time`=? where `id`=?";
-	const rows = await Query(sql, [categoryId, title, content, Date.now(), id]);
+	const {rows} = await Query(sql, [categoryId, title, content, Date.now(), id]);
 	//console.log(rows);
 	if (rows.affectedRows) {
 		res.send({
@@ -466,6 +470,7 @@ exports.submitArt = async (req, res) => {
  *
  * */
 exports.getComByTimestamp = async (req, res) => {
+	// 1.获取节点时间戳数组
 	// id为路径参数，必传值
 	const artId = req.params.id;
 	let {timestamp, pageSize} = req.query;
@@ -479,51 +484,56 @@ exports.getComByTimestamp = async (req, res) => {
 		size: parseInt(pageSize)
 	}
 	const sql = "select com_time,rn from (select com_time, ROW_NUMBER() over (PARTITION BY art_id ORDER BY com_time DESC) as rn from my_list WHERE art_id=? ) emp  WHERE rn % ? =1";
-	const rows = await Query(sql, [data.artId, data.size]);
-	console.log(rows);
-	if (rows.length > 0) {
-		// 存储分页节点的时间戳值，pageArray值已经按照降序排列好了
-		const pageArray = rows;
-		console.log(pageArray);
-		let timeArray = pageArray.map(item => (item.com_time));
-		console.log(timeArray);
-		// 根据节点时间戳，获取分页数据
-		const SQL = "SELECT * FROM my_list WHERE com_time <=? ORDER BY com_time desc limit ?";
-		//根据传入的时间戳值，设置参数SQL_DATA
-		let SQL_DATA = [];
-		// 并将下次请求节点时间戳值返回前端
-		let pre_timestamp;
-		if (!timeArray.includes(timestamp)) {
-			//console.log(timeArray.includes(timestamp));
-			SQL_DATA = [timeArray[0], data.size];
-			pre_timestamp = timeArray[1];
-			const rows = await Query(SQL, SQL_DATA);
-			if (rows.length > 0) {
-				res.send({
-					code: 200,
-					message: "请求评论列表成功",
-					data: {
-						pre_timestamp: pre_timestamp,
-						list: rows
-					}
-				})
-			} else {
-				res.send({
-					code: 500,
-					message: "评论列表没有记录"
-				});
+	let {rows: row1} = await Query(sql, [data.artId, data.size]);
+	console.log("test", row1);
+
+	// 2.根据节点时间戳返回分页数据
+	const SQL = "SELECT * FROM my_list WHERE art_id=? and com_time <=? ORDER BY com_time desc limit ?";
+	//根据传入的时间戳值，设置参数SQL_DATA
+	let SQL_DATA = [];
+	// 并将下次请求节点时间戳值返回前端
+	let pre_timestamp;
+	// 存储分页节点的时间戳值，pageArray值已经按照降序排列好了
+	let timeArray = row1.map(item => (item.com_time));
+	console.log(timeArray);
+	if (row1.length === 1) {
+		SQL_DATA = [data.artId, timeArray[0], data.size];
+		pre_timestamp = 0;
+		const {rows} = await Query(SQL, SQL_DATA);
+		res.send({
+			code: 200,
+			message: "请求评论列表成功",
+			data: {
+				list: rows,
+				pre_timestamp: pre_timestamp
 			}
+		})
+	} else if (row1.length > 1) {
+		if (!timeArray.includes(timestamp)) {// 表示最开始取分页数据的情况
+			//console.log(timeArray.includes(timestamp));
+			SQL_DATA = [data.artId, timeArray[0], data.size];
+			pre_timestamp = timeArray[1];
+			const {rows} = await Query(SQL, SQL_DATA);
+			res.send({
+				code: 200,
+				message: "请求评论列表成功",
+				data: {
+					pre_timestamp: pre_timestamp,
+					list: rows
+				}
+			});
+
 		} else {// 请求参数时间戳在数组中
 			//console.log(timeArray.includes(timestamp));
 			let index = timeArray.indexOf(timestamp);
-			SQL_DATA = [timeArray[index], data.size];
+			SQL_DATA = [data.artId, timeArray[index], data.size];
 			if (timeArray.length > index + 1) {
 				pre_timestamp = timeArray[index + 1];
 			} else {
 				pre_timestamp = 0;// 表示这已经是最后一页数据了
 			}
 			console.log("my_test", pre_timestamp);
-			const rows = await Query(SQL, SQL_DATA);
+			const {rows} = await Query(SQL, SQL_DATA);
 			res.send({
 				code: 200,
 				message: "请求评论列表成功",
@@ -573,7 +583,7 @@ exports.submitComment = async (req, res) => {
 	}
 	// 给content起个别名，以避免和req.body中content解构重名
 	const {id, art_id, img, content: _content, com_time, username, fav} = data;
-	const rows = await Query(sql, [id, art_id, img, _content, com_time, username, fav]);
+	const {rows} = await Query(sql, [id, art_id, img, _content, com_time, username, fav]);
 	//console.log(rows);
 	if (rows.affectedRows) {
 		res.send({
@@ -596,7 +606,7 @@ exports.submitComment = async (req, res) => {
 exports.changeComment = async (req, res) => {
 	const {id, fav} = req.body;
 	const sql = "update `my_list` set `fav`=? where `id`=?";
-	const rows = await Query(sql, [fav, id]);
+	const {rows} = await Query(sql, [fav, id]);
 	if (rows.affectedRows) {
 		res.send({
 			code: 200,
@@ -616,7 +626,7 @@ exports.changeComment = async (req, res) => {
 exports.delComment = async (req, res) => {
 	const {id} = req.params;
 	const sql = "delete from `my_list` where `id`=?";
-	const rows = await Query(sql, [id]);
+	const {rows} = await Query(sql, [id]);
 	console.log(rows);
 	if (rows.affectedRows) {
 		res.send({
