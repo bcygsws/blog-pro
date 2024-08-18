@@ -26,7 +26,7 @@
         </n-layout-sider>
         <n-layout content-style="padding: 24px;" :native-scrollbar="false">
           <div class="content">
-            <router-view/>
+            <router-view></router-view>
           </div>
         </n-layout>
       </n-layout>
