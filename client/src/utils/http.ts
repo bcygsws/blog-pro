@@ -1,5 +1,9 @@
 import axios from 'axios';
-import {getToken} from "./token";
+import {clear, getToken} from "./token";
+import useDiscreteAPI from "@/utils/useDiscreteAPI";
+
+
+const {message} = useDiscreteAPI();
 
 
 const http = axios.create({
@@ -20,6 +24,18 @@ http.interceptors.request.use(config => {
 http.interceptors.response.use(response => {
     return response;
 }, (err) => {
-    return Promise.reject(err);
+    // 打印错误，将  导航至登录页注释掉，才能看见错误
+    console.log('http', err);
+    // 处理 token过期或者其他未知错误的回调函数，超出2xx的状态码，在err回调中处理
+    if (err.response.status === 401 || err.response.status === 501) {
+        // a.清理掉无效token
+        clear('MY_TOKEN');
+        // b.使用message提示错误
+        message.error("出现错误：" + err.message + ",状态码：" + err.response.status);
+        // c.导航至登录页
+        window.location.href = "/login";
+        // d.返回错误
+        return Promise.reject(err.message);// 返回错误信息
+    }
 });
 export default http;

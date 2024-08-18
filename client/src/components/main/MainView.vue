@@ -38,6 +38,11 @@ console.log("testx", route.path);
 const value_selected = ref('')
 console.log(value_selected);
 
+// 定义组件名
+defineOptions({
+  name: "MainView"
+});
+
 interface ILabel {
   label: string;
   value: string;
@@ -86,7 +91,7 @@ const getArtList = async (val: IPage) => {
   const res = await _getArtAPI(val);
   console.log(res.data);
   if (res.data.code === 200) {
-    const {count, list} = res.data.data;
+    const {count, list} = res.data.data!;
     total.value = count;
     artList.value = list;
 

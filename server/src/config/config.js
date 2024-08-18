@@ -1,4 +1,4 @@
 module.exports = {
 	SECRET_KEY: 'my secret key',
-	expiresIn: '2h'
+	EXPIRES_IN:'2h'
 }

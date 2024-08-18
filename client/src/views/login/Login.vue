@@ -60,6 +60,7 @@ import resetForm from "@/utils/resetForm";
 const {message} = useDiscreteAPI();
 const loginStore = useLogin();
 export default defineComponent({
+  name: "Login",
   setup() {
     // useRouter需要再setup函数内创建实例，否则router.push导航不起作用
     const router = useRouter();

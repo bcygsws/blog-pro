@@ -30,6 +30,10 @@ import HeaderItem from "@/components/item/HeaderItem.vue";
 const router = useRouter();
 const route = useRoute();
 const {message} = useDiscreteAPI();
+// 定义组件名称
+defineOptions({
+  name: "CategoryView"
+});
 
 interface ILabel {
   label: string;
@@ -80,7 +84,7 @@ const artList = ref<IList[]>([]);
 const getArtList = async (val: IPage) => {
   const res = await _getArtAPI(val);
   console.log(res.data);
-  if (res.data.code === 200) {
+  if (res.data.code === 200) {// 返回码200，表示一定是请求到了数据，可以给res.data.data断言
     const {count, list} = res.data.data!;
     total.value = count;
     artList.value = list;

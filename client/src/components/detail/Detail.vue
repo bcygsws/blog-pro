@@ -49,7 +49,6 @@
                 placeholder="请输入评论内容……"
                 v-model:value="comment.content"
                 maxlength="140"
-                @blur="handleBlur"
                 @focus="handleFocus"
                 @input="handleInput"
             />
@@ -62,7 +61,7 @@
 
       </div>
       <!--列表区-->
-      <n-infinite-scroll style="height: 300px" :distance="10" @load="handleLoad">
+      <n-infinite-scroll style="height: 400px" :distance="10" @load="handleLoad">
         <div class="list" v-for="item in resArray" :key="item.id">
           <div class="figure">
             <!--只指定图片的 width和height其中一个，图片会等比例缩放；我们希望宽和高相等-->
@@ -146,7 +145,7 @@ const comment = reactive<ICommentList>({
   artId: artId,// 当前所在详情页的分类id
   content: "",
   fav: 0,
-  pageSize: 5,// 每页数据容量
+  pageSize: 4,// 每页数据容量
   timestamp: Date.now(),// 时间初始值设置为当前时间
 
 });
@@ -230,13 +229,8 @@ const backHandler = () => {
 
 }
 /**
- * @textarea评论区事件
- *
- *
+ * @textarea评论区事件处理
  * */
-const handleBlur = () => {
-  // flag.value = false;
-}
 const handleFocus = () => {
   flag.value = true;
 }
@@ -306,20 +300,20 @@ const handleLoad = async () => {
   // 做延时处理，便于看到下拉加载效果
   await new Promise((resolve) => {
     setTimeout(() => {
-      resolve({});
-    }, 1000);
+      resolve("");
+    }, 500);
   });
   const res = await getComByTimeAPI({
     artId: artId,
-    timestamp: comment.timestamp as number,
-    pageSize: comment.pageSize as number
+    timestamp: <number>comment.timestamp,
+    pageSize: <number>comment.pageSize
   });
   if (res.data.code === 200) {
     curArray.value = res.data.data?.list!;
     comment.timestamp = res.data.data?.pre_timestamp;
     console.log("test res", curArray.value);
     console.log("test res", comment.timestamp);
-    comArray.value = curArray.value.concat(comArray.value);
+    comArray.value = [...comArray.value, ...curArray.value];
   } else {// 当请求出错时，恢复最初状态
     curArray.value = [];
     comment.timestamp = Date.now();
@@ -572,6 +566,10 @@ const delById = async (id: number) => {
         }
 
 
+      }
+
+      .n-divider:not(.n-divider--vertical) {
+        margin: 10px 0;
       }
     }
   }

@@ -55,11 +55,17 @@ app.use(
 	expJWT({secret: SECRET_KEY, algorithms: ['HS256']}).unless({path: ['/login', /^\/api\/+/]})
 );
 // 4.错误处理中间件
+/**
+ * status状态码：和前端约定好
+ * 401： token失效错误
+ * 501：其他未知错误
+ *
+ * */
 app.use((err, req, res, next) => {
 	if (err.name === 'UnauthorizedError') {
-		res.status(401).send({code: 0, msg: err.message});
+		res.status(401).send({msg: err.message});
 	}
-	res.send({code: 500, message: '未知的错误'});
+	res.status(501).send({msg: err.message});
 });
 
 

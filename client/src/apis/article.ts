@@ -65,7 +65,7 @@ export type IAdd = {
     title: string
     name: string
 }
-const addArtAPI = (val: UnwrapRef<{ title: string; content: string; categoryId: null }>) => {
+const addArtAPI = (val: IModel) => {
     return http.request({
         url: `/manage_art`,
         method: "POST",
@@ -89,7 +89,7 @@ const _getArtByIdAPI = (id: number) => {
 // 5.put方法，提交body参数提交博客列表记录的修改
 export type IModel = {
     id?: number;
-    categoryId: string | null;
+    categoryId: string;
     title: string;
     content: string;
 }

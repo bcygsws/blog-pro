@@ -87,7 +87,7 @@ defineProps({
  * */
 const navToDetail = (id: number) => {
   // console.log(typeof id);
-  router.push(`/manage_art/${id}`);
+  router.push(`/detail/${id}`);
 }
 
 </script>

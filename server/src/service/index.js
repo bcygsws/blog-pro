@@ -17,7 +17,7 @@ const GenId = require('../utils/SnowFlake');
 const genid = new GenId({WorkerId: 1});
 // jwt插件产生token
 const jwt = require('jsonwebtoken');
-const {SECRET_KEY, expiresIn} = require("../config/config");
+const {SECRET_KEY, EXPIRES_IN} = require("../config/config");
 /**
  * @登录路由
  * http://localhost:8081/login
@@ -32,7 +32,8 @@ exports.loginService = async (req, res) => {
 	// rows是数组变量
 	const sql = "select * from `admin` where `account`=? and `password`=? ";
 	const {rows} = await Query(sql, [account, password]);
-	console.log("testing", rows);// 查询的结果
+	//console.log("testing", rows);// 查询的结果
+	console.log("testing", rows[0]);// 查询的结果
 	// 1.登录成功判断
 	//
 	// 方案一：简单使用uuid生成了token,安全性低
@@ -71,7 +72,7 @@ exports.loginService = async (req, res) => {
 			account: rows[0].account,
 			password: rows[0].password
 		}
-		const token = jwt.sign(rules, SECRET_KEY, {expiresIn: expiresIn});
+		const token = jwt.sign(rules, SECRET_KEY, {expiresIn: EXPIRES_IN});
 		// 将token值更新到数据库中
 		const sql = "update `admin` set `token`=? where `id`=?";
 		await Query(sql, [token, admin_id]);
@@ -239,7 +240,7 @@ exports.getBlog = async (req, res) => {
 	//
 	let result;
 	result = await Promise.all([p1, p2]);
-	console.log(result);
+	//console.log(result);
 	//console.log("test-rows",result);// [{rows:[总数]},{rows:[list列表]}]
 	const {rows: total} = result[0]
 	const {rows: list} = result[1];

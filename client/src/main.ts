@@ -1,19 +1,20 @@
-import {createApp} from 'vue'
-import './style.scss'
+import {createApp} from 'vue';
+import './style.scss';
 import App from '@/App.vue';
 import router from "@/router/index";
 import naive from "naive-ui"
 import {createPinia} from "pinia";
 
 const app = createApp(App);
+// 注册pinia转态管理器
+const pinia = createPinia();
+app.use(pinia);
 // 配置路由
 app.use(router);
 // 全局引入naive-ui组件
 app.use(naive);
+
 // 渲染index.html中app
-// 注册pinia转态管理器
-const pinia = createPinia();
-app.use(pinia);
 app.mount('#app');
 /**
  *

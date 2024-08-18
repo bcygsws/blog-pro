@@ -112,13 +112,13 @@ const artList = ref<IList[] | undefined>([]);
 const model = ref<IModel>({
   title: '',
   content: '',
-  categoryId: null
+  categoryId: ''
 });
 // 修改列表时，表单数据对象
 const model_change = ref<IModel>({
   title: '',
   content: '',
-  categoryId: null
+  categoryId: ''
 });
 // 分类列表catList
 const catList = ref<ICategory[]>([]);
@@ -134,7 +134,7 @@ const myRef = ref(null);
 const myRef2 = ref(null);
 // 获取tabs对象
 const tabsInstRef = ref<TabsInst | null>(null);
-const tab_value = ref('add');
+const tab_value = ref('list');
 
 const getArtList = async (val: Ref<IPage>) => {
   const res = await getArtAPI(val.value);
@@ -200,9 +200,9 @@ const delHandler = async (id: number) => {
 const handleAddValidate = (e: MouseEvent) => {
   e.preventDefault();
   // console.log(myRef.value);
-  console.log(myRef.value.sonRef);
+  console.log(myRef.value!['sonRef']);
   // console.log(myRef.value.sonRef);
-  myRef.value.sonRef.validate(async (errors) => {
+  myRef.value?.sonRef.validate(async (errors: string) => {
     console.log("我执行了吗？2");
     if (!errors) {
       console.log(model.value);
@@ -212,7 +212,7 @@ const handleAddValidate = (e: MouseEvent) => {
         message.success('添加成功');
         // 更新文章列表
         await getArtList(pageInfo);
-        model.value.categoryId = null;
+        model.value.categoryId = '';
         model.value.title = model.value.content = '';
       } else {
         message.error('添加失败');
@@ -231,7 +231,7 @@ const handleAddValidate = (e: MouseEvent) => {
  * */
 const handleModifiedValidate = (e: MouseEvent) => {
   e.preventDefault();
-  myRef2.value.sonRef.validate(async (errors) => {
+  myRef2.value?.sonRef.validate(async (errors: string) => {
     if (!errors) {
       const res = await submitModifiedAPI(model_change.value);
       if (res.data.code === 200) {
@@ -245,7 +245,7 @@ const handleModifiedValidate = (e: MouseEvent) => {
         // 3.2 滚动条同步更新
         await nextTick(() => tabsInstRef.value?.syncBarPosition());
         // 3.3 修改文章表单置空
-        model_change.value.categoryId = null;
+        model_change.value.categoryId = '';
         model_change.value.content = model_change.value.title = ''
       } else {
         message.error('修改失败');
