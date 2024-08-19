@@ -105,8 +105,8 @@ import {IComment} from '@/apis/shared';
 import useDiscreteAPI from "@/utils/useDiscreteAPI";
 import {useRoute, useRouter} from "vue-router";
 import {timeFormat} from "@/utils/timeFormat";
-import {ThumbUp} from '@vicons/tabler';
 import _ from 'lodash';
+import {ThumbUp} from '@vicons/tabler';
 // 控制icon图标的样式，如：size color和以何种标签渲染的tag等等
 import {Icon} from '@vicons/utils';
 import {
@@ -465,6 +465,7 @@ const delById = async (id: number) => {
         flex: 1;
         height: 120px;
         box-sizing: border-box;
+        padding-left: 15px;
         //background-color: pink;
         position: relative;
 

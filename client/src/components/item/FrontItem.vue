@@ -14,14 +14,16 @@
     <div class="art-list">
       <!--list列表-->
       <div class="list">
+        <!--bordered值为false,去掉边框；hoverable卡片悬浮效果-->
         <n-card
-            :title="item.title"
+            :title="titleIcon(item.title)"
             v-for="item in artList"
             :key="item.id"
-            header-style="font-size:14px"
-            content-style="font-size:16px"
-            footer-style="font-size:14px"
+            header-style="font-size:16px"
+            content-style="font-size:18px"
+            footer-style="font-size:16px"
             @click="navToDetail(item.id)"
+            :bordered="false"
         >
           {{ item.content }}
           <template #footer>
@@ -49,6 +51,11 @@
 import {timeFormat} from "@/utils/timeFormat";
 import {IList} from "@/apis/article";
 import {useRouter} from "vue-router";
+import {Diamond} from '@vicons/tabler';
+// 控制icon图标的样式，如：size color和以何种标签渲染的tag等等
+import {Icon} from '@vicons/utils';
+import {h} from "vue";
+import {NButton} from "naive-ui";
 
 const router = useRouter();
 defineProps({
@@ -89,7 +96,22 @@ const navToDetail = (id: number) => {
   // console.log(typeof id);
   router.push(`/detail/${id}`);
 }
-
+/**
+ * @description:使用render和h函数，渲染创建的节点
+ *
+ * */
+const titleIcon = (text: string) => {
+  // 返回一个render函数，匹配title的类型
+  return () => {
+    return h('div', {style: {display: 'flex', flexDirection: 'row', alignItems: 'center'}}, {
+      default: () => [
+        h(Icon, {color: '#18A058', size: '20px'}, {
+          default: () => h(Diamond, null)
+        }),
+        h('span', {style: {paddingLeft: '5px', fontWeight: 700}}, `${text}`)]
+    });
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -114,7 +136,15 @@ const navToDetail = (id: number) => {
     overflow-x: hidden;
 
     .list {
+      width: 100%;
+      box-sizing: border-box;
       cursor: pointer;
+      /*消除card的margin-top塌陷*/
+      overflow: hidden;
+    }
+
+    .n-card {
+      min-height: 162px;
     }
 
 
@@ -131,9 +161,9 @@ const navToDetail = (id: number) => {
 
   }
 
-  .card-head {
-    font-size: 14px;
-  }
+  //.card-head {
+  //  font-size: 14px;
+  //}
 
 }
 
