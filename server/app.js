@@ -51,6 +51,7 @@ app.all("*", (req, res, next) => {
 	}
 });
 // expJWT(密钥对象，加密算法对象).unless({path:[白名单，无需token验证的那些路由]})
+//HS256相关：https://zhuanlan.zhihu.com/p/505799575
 app.use(
 	expJWT({secret: SECRET_KEY, algorithms: ['HS256']}).unless({path: ['/login', /^\/api\/+/]})
 );

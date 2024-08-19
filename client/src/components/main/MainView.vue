@@ -53,6 +53,7 @@ const catList = ref<ICategory[]>([]);
 // 弹出下拉框的配置项
 let options: ILabel[] = [];
 // 定义变量存储路由参数
+// id=0,name=""表示默认切换到【分类】状态时，路由参数的默认值
 const routeArg = ref<ICategory>({id: 0, name: ""});
 // 获取分类id
 const getCatList = async () => {

@@ -47,7 +47,10 @@ let options: ILabel[] = [];
 
 // 定义变量存储路由参数
 // 为route.params.id插入类型断言，消除警告提示；两种方式：1. <string>route.params.id 2.route.params.id as string
-const routeArg = ref<ICategory>({id: parseInt(route.params.id as string), name: ""});
+const routeArg = ref<ICategory>({
+  id: parseInt(route.params.id as string),
+  name: ""
+});
 // 获取分类id
 const getCatList = async () => {
   const res = await _getCatAPI();

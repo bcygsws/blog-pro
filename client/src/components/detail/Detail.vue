@@ -301,7 +301,7 @@ const handleLoad = async () => {
   await new Promise((resolve) => {
     setTimeout(() => {
       resolve("");
-    }, 500);
+    }, 1000);
   });
   const res = await getComByTimeAPI({
     artId: artId,
@@ -406,7 +406,7 @@ const delById = async (id: number) => {
   .header {
     display: flex;
     flex-flow: column nowrap;
-    padding: 10px;
+    padding: 10px 0;
     box-sizing: border-box;
 
     .nav {
