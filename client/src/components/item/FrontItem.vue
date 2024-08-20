@@ -19,9 +19,9 @@
             :title="titleIcon(item.title)"
             v-for="item in artList"
             :key="item.id"
-            header-style="font-size:16px"
-            content-style="font-size:18px"
-            footer-style="font-size:16px"
+            header-style="font-size:15px"
+            content-style="font-size:16px"
+            footer-style="font-size:14px"
             @click="navToDetail(item.id)"
             :bordered="false"
         >

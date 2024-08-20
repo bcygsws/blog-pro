@@ -10,10 +10,10 @@
         :to="{path:'/category/'+routeArg.id,query:{name:routeArg.name}}"
         active-class="active">
       <n-popselect
-          v-model="route.query.name"
+          v-model:value="route.query.name as string"
           :options="options"
-          trigger="click"
           @update:value="valueChanged"
+          trigger="click"
       >
         <span>分类<span class="sp">{{ route.query.name }}</span></span>
       </n-popselect>
